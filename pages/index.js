@@ -31,7 +31,7 @@ export default function Home() {
     console.log("=== Processing Order ===");
     console.log("Order ID:", order.id);
     console.log("Order State:", order.state);
-    console.log("Full Order:", JSON.stringify(order, null, 2));
+    // console.log("Full Order:", JSON.stringify(order, null, 2)); // Verbose
 
     if (!order || !order.id) {
       console.warn("Invalid order object:", order);
@@ -41,33 +41,28 @@ export default function Home() {
     const fulfillments = order.fulfillments || [];
     const lineItems = order.line_items || [];
 
-    // Determine status based on Square's order and fulfillment states
     let status = "received"; // default
     let completedAt = null;
 
-    console.log("Fulfillments:", fulfillments);
+    // console.log("Fulfillments:", fulfillments); // Verbose
 
-    // First check overall order state
     if (order.state === "COMPLETED") {
       status = "completed";
       completedAt = order.updated_at || order.created_at;
     } else if (order.state === "CANCELED") {
-      // Skip canceled orders
       return null;
     } else {
-      // Order is OPEN, check fulfillment states for more specific status
       if (fulfillments && fulfillments.length > 0) {
-        // Look for the primary fulfillment (usually the first one)
         const primaryFulfillment = fulfillments[0];
         
-        console.log("Primary Fulfillment State:", primaryFulfillment.state);
-        console.log("Primary Fulfillment:", JSON.stringify(primaryFulfillment, null, 2));
+        // console.log("Primary Fulfillment State:", primaryFulfillment.state); // Verbose
+        // console.log("Primary Fulfillment:", JSON.stringify(primaryFulfillment, null, 2)); // Verbose
 
         switch (primaryFulfillment.state) {
           case "PROPOSED":
             status = "received";
             break;
-          case "RESERVED":
+          case "RESERVED": // Square's "IN_PROGRESS" or "ACCEPTED" might map to "RESERVED" or custom logic
             status = "preparing";
             break;
           case "PREPARED":
@@ -78,7 +73,6 @@ export default function Home() {
             completedAt = primaryFulfillment.updated_at || primaryFulfillment.created_at;
             break;
           case "CANCELED":
-            // Skip canceled fulfillments
             return null;
           default:
             console.warn("Unknown fulfillment state:", primaryFulfillment.state);
@@ -87,49 +81,37 @@ export default function Home() {
       }
     }
 
-    console.log("Determined Status:", status);
+    // console.log("Determined Status:", status); // Verbose
 
-    // Extract customer name from various sources
     let customerName = null;
-    
     if (fulfillments[0]?.pickup_details?.recipient?.display_name) {
       customerName = fulfillments[0].pickup_details.recipient.display_name;
     } else if (fulfillments[0]?.pickup_details?.note) {
       customerName = fulfillments[0].pickup_details.note;
     } else if (fulfillments[0]?.delivery_details?.recipient?.display_name) {
       customerName = fulfillments[0].delivery_details.recipient.display_name;
-    } else if (order.recipient?.display_name) {
+    } else if (order.recipient?.display_name) { // Fallback to order level recipient
       customerName = order.recipient.display_name;
     }
 
-    // Process line items with detailed variations and modifiers
+
     const processedLineItems = lineItems.map((item) => {
       let itemName = item.name || "Unknown Item";
-      
-      let variationName = null;
-      if (item.variation_name) {
-        variationName = item.variation_name;
-      } else if (item.catalog_object_id) {
-        variationName = item.catalog_object_id;
-      }
+      let variationName = item.variation_name || item.catalog_object_id || null;
 
-      const modifiers = (item.modifiers || []).map((modifier) => {
-        return {
-          name: modifier.name || "Modifier",
-          quantity: parseInt(modifier.quantity) || 1,
-          price: modifier.base_price_money ? parseInt(modifier.base_price_money.amount) : 0,
-          catalog_object_id: modifier.catalog_object_id || null,
-        };
-      });
-
-      const itemNote = item.note || null;
+      const modifiers = (item.modifiers || []).map((modifier) => ({
+        name: modifier.name || "Modifier",
+        quantity: parseInt(modifier.quantity) || 1,
+        price: modifier.base_price_money ? parseInt(modifier.base_price_money.amount) : 0,
+        catalog_object_id: modifier.catalog_object_id || null,
+      }));
 
       return {
         name: itemName,
         variationName: variationName,
         quantity: parseInt(item.quantity) || 1,
         modifiers: modifiers,
-        note: itemNote,
+        note: item.note || null,
         price: item.total_money ? parseInt(item.total_money.amount) : 0,
         catalog_object_id: item.catalog_object_id || null,
       };
@@ -138,7 +120,7 @@ export default function Home() {
     const transformedOrder = {
       id: order.id,
       displayId: order.id.slice(-6),
-      version: order.version || 1,
+      version: order.version, // Ensure version is captured
       status,
       timestamp: order.created_at || new Date().toISOString(),
       completedAt: completedAt,
@@ -147,18 +129,15 @@ export default function Home() {
       total: parseInt(order.total_money?.amount || 0),
       notes: order.note || null,
       fulfillmentId: fulfillments[0]?.uid || null,
-      // Store raw Square data for debugging
       squareOrderState: order.state,
       squareFulfillmentState: fulfillments[0]?.state || null,
     };
 
-    console.log("Transformed Order:", transformedOrder);
-    console.log("=== End Processing Order ===\n");
-
+    // console.log("Transformed Order:", transformedOrder); // Verbose
+    // console.log("=== End Processing Order ===\n"); // Verbose
     return transformedOrder;
   };
 
-  // Fetch orders from Square API via our proxy
   const fetchOrders = useCallback(async () => {
     if (!CONFIG.SQUARE_LOCATION_ID_CONFIG) {
       setError("Configuration error: Location ID not set");
@@ -170,71 +149,52 @@ export default function Home() {
     setError(null);
 
     try {
-      // Fetch orders from the last 8 hours to include recently completed ones
       const startTime = new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString();
       
       const response = await fetch("/api/square-proxy", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           environment: CONFIG.SQUARE_ENVIRONMENT_CONFIG,
           square_api_path: "/v2/orders/search",
+          actual_method_for_square: "POST", // Explicitly state method for proxy
           body: {
             location_ids: [CONFIG.SQUARE_LOCATION_ID_CONFIG],
             query: {
               filter: {
-                date_time_filter: {
-                  created_at: {
-                    start_at: startTime,
-                  },
-                },
-                state_filter: {
-                  states: ["OPEN", "COMPLETED"], // Include both open and completed
-                },
+                date_time_filter: { created_at: { start_at: startTime } },
+                state_filter: { states: ["OPEN", "COMPLETED"] },
               },
-              sort: {
-                sort_field: "CREATED_AT",
-                sort_order: "DESC",
-              },
+              sort: { sort_field: "CREATED_AT", sort_order: "DESC" },
             },
-            limit: 100, // Increased limit to get more orders
+            limit: 100,
           },
         }),
       });
 
       if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`HTTP ${response.status}: ${errorText}`);
+        const errorData = await response.json().catch(() => ({ detail: response.statusText }));
+        throw new Error(`HTTP ${response.status}: ${errorData.errors?.[0]?.detail || errorData.detail || "Failed to fetch orders"}`);
       }
 
       const data = await response.json();
-      console.log("=== Square API Response ===");
-      console.log("Total orders returned:", data.orders?.length || 0);
-      console.log("Full response:", JSON.stringify(data, null, 2));
+      // console.log("=== Square API Response (Fetch) ==="); // Verbose
+      // console.log("Total orders returned:", data.orders?.length || 0); // Verbose
+      // console.log("Full response:", JSON.stringify(data, null, 2)); // Verbose
+
 
       if (data.errors && data.errors.length > 0) {
-        throw new Error(data.errors[0].detail || "Square API error");
+        throw new Error(data.errors[0].detail || "Square API error during fetch");
       }
 
       if (!data.orders) {
-        console.log("No orders found in response");
         setOrders([]);
-        setConnectionStatus("connected");
-        return;
+      } else {
+        const transformedOrders = data.orders
+          .map(transformSquareOrder)
+          .filter((order) => order !== null);
+        setOrders(transformedOrders);
       }
-
-      const transformedOrders = data.orders
-        .map(transformSquareOrder)
-        .filter((order) => order !== null);
-
-      console.log("=== Final Transformed Orders ===");
-      transformedOrders.forEach(order => {
-        console.log(`Order ${order.displayId}: ${order.status} (Square: ${order.squareOrderState}/${order.squareFulfillmentState})`);
-      });
-
-      setOrders(transformedOrders);
       setConnectionStatus("connected");
     } catch (err) {
       console.error("Error fetching orders:", err);
@@ -245,10 +205,8 @@ export default function Home() {
     }
   }, []);
 
-  // Filter orders based on active tab
   useEffect(() => {
     let filtered = orders;
-
     switch (activeTab) {
       case "new":
         filtered = orders.filter((order) => order.status === "received");
@@ -264,130 +222,152 @@ export default function Home() {
         break;
       case "all":
       default:
-        // Show all except completed for "all" tab
         filtered = orders.filter((order) => order.status !== "completed");
     }
 
-    // Sort orders appropriately
     if (activeTab === "completed") {
       filtered = filtered.sort((a, b) => 
         new Date(b.completedAt || b.timestamp) - new Date(a.completedAt || a.timestamp)
       );
     } else {
       filtered = filtered.sort((a, b) => 
-        new Date(b.timestamp) - new Date(a.timestamp)
+        new Date(a.timestamp) - new Date(b.timestamp) // Sort oldest first for active orders
       );
     }
-
     setFilteredOrders(filtered);
   }, [orders, activeTab]);
 
-  // Auto-refresh orders
   useEffect(() => {
     fetchOrders();
-
-    const interval = setInterval(() => {
-      fetchOrders();
-    }, CONFIG.REFRESH_INTERVAL_SECONDS_CONFIG * 1000);
-
+    const interval = setInterval(fetchOrders, CONFIG.REFRESH_INTERVAL_SECONDS_CONFIG * 1000);
     return () => clearInterval(interval);
   }, [fetchOrders]);
 
-  // Handle status updates - this will update Square via API
   const handleStatusUpdate = async (orderId, newStatus) => {
     console.log(`Attempting to update order ${orderId} to status: ${newStatus}`);
     
-    // Find the order to get its details
-    const order = orders.find(o => o.id === orderId);
-    if (!order) {
-      console.error("Order not found:", orderId);
+    const orderToUpdate = orders.find(o => o.id === orderId);
+    if (!orderToUpdate) {
+      setError("Error: Could not find the order to update.");
       return;
     }
 
-    // Optimistically update the UI first
+    if (typeof orderToUpdate.version === 'undefined') {
+      setError("Error: Order version is missing. Please refresh.");
+      fetchOrders();
+      return;
+    }
+
+    // Block fulfillment state updates if no fulfillmentId and not marking as completed
+    if (!orderToUpdate.fulfillmentId && newStatus !== "completed") {
+      setError("This order cannot be updated because it has no fulfillment. Only completed status is allowed.");
+      return;
+    }
+
+    const originalOrders = [...orders];
+
+    // Optimistically update UI
     setOrders((prevOrders) =>
       prevOrders.map((order) => {
         if (order.id === orderId) {
           const updatedOrder = { ...order, status: newStatus };
-          
-          if (newStatus === "completed") {
+          if (newStatus === "completed" && !order.completedAt) {
             updatedOrder.completedAt = new Date().toISOString();
           }
-          
           return updatedOrder;
         }
         return order;
       })
     );
 
-    // Map our status to Square fulfillment state
     let squareFulfillmentState;
     switch (newStatus) {
-      case "received":
-        squareFulfillmentState = "PROPOSED";
-        break;
-      case "preparing":
-        squareFulfillmentState = "RESERVED";
-        break;
-      case "ready":
-        squareFulfillmentState = "PREPARED";
-        break;
-      case "completed":
-        squareFulfillmentState = "COMPLETED";
-        break;
-      default:
-        console.error("Unknown status:", newStatus);
-        return;
+      case "received": squareFulfillmentState = "PROPOSED"; break;
+      case "preparing": squareFulfillmentState = "RESERVED"; break;
+      case "ready": squareFulfillmentState = "PREPARED"; break;
+      case "completed": squareFulfillmentState = "COMPLETED"; break;
+      default: setError("Unknown status for Square mapping."); return;
     }
+
+    const idempotencyKey = `update-${orderId}-${newStatus}-${Date.now()}`;
 
     try {
-      // Update the fulfillment in Square
-      if (order.fulfillmentId) {
-        const response = await fetch("/api/square-proxy", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
+      const requestBodyToProxy = {
+        environment: CONFIG.SQUARE_ENVIRONMENT_CONFIG,
+        square_api_path: `/v2/orders/${orderId}`,
+        actual_method_for_square: "PUT",
+        body: {
+          order: {
+            version: orderToUpdate.version,
+            location_id: CONFIG.SQUARE_LOCATION_ID_CONFIG,
           },
-          body: JSON.stringify({
-            environment: CONFIG.SQUARE_ENVIRONMENT_CONFIG,
-            square_api_path: `/v2/orders/${orderId}/fulfillments/${order.fulfillmentId}`,
-            body: {
-              fulfillment: {
-                state: squareFulfillmentState,
-              },
-            },
-          }),
-        });
+          idempotency_key: idempotencyKey,
+        },
+      };
 
-        if (!response.ok) {
-          throw new Error(`Failed to update fulfillment: ${response.status}`);
+      // Only include fulfillments if fulfillmentId exists
+      if (orderToUpdate.fulfillmentId) {
+        requestBodyToProxy.body.order.fulfillments = [
+          {
+            uid: orderToUpdate.fulfillmentId,
+            state: squareFulfillmentState,
+          },
+        ];
+      }
+
+      // If marking as completed and there's no fulfillmentId, update order state
+      if (newStatus === "completed" && !orderToUpdate.fulfillmentId) {
+        requestBodyToProxy.body.order.state = "COMPLETED";
+      }
+
+      const response = await fetch("/api/square-proxy", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(requestBodyToProxy),
+      });
+
+      if (!response.ok) {
+        const errorResult = await response.json().catch(() => ({ detail: response.statusText }));
+        console.error("Square update API error response:", errorResult);
+
+        if (
+          Array.isArray(errorResult.errors) &&
+          errorResult.errors.some(e => e.code === "VERSION_MISMATCH")
+        ) {
+          setError("Order was updated elsewhere. Refreshing orders. Please try again.");
+          fetchOrders();
+          setOrders(originalOrders);
+          return;
         }
 
-        const result = await response.json();
-        console.log("Square fulfillment update result:", result);
+        if (Array.isArray(errorResult.errors) && errorResult.errors.length > 0) {
+          setError(`Square API error: ${errorResult.errors[0].detail || "Unknown error"}`);
+        } else if (errorResult.detail) {
+          setError(`Square API error: ${errorResult.detail}`);
+        } else {
+          setError("Failed to update order due to an unknown error.");
+        }
+        setOrders(originalOrders);
+        return;
       }
+
+      const result = await response.json();
+      console.log("Square order update successful:", result);
+      fetchOrders();
+
     } catch (error) {
-      console.error("Error updating Square fulfillment:", error);
-      
-      // Revert the optimistic update on error
-      setOrders((prevOrders) =>
-        prevOrders.map((o) => 
-          o.id === orderId ? order : o
-        )
-      );
-      
-      setError(`Failed to update order status: ${error.message}`);
+      console.error("Error updating Square order:", error);
+      setOrders(originalOrders);
+      setError(`Failed to update order: ${error.message}. Please try refreshing.`);
     }
   };
+
 
   return (
     <>
       <Head>
         <title>Barista KDS</title>
-        <meta
-          name="description"
-          content="Barista Kitchen Display System for 5-inch touchscreen"
-        />
+        <meta name="description" content="Barista Kitchen Display System" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
@@ -399,19 +379,18 @@ export default function Home() {
           onRefresh={fetchOrders}
           isLoading={isLoading}
         />
-
         <OrderTabs
           activeTab={activeTab}
           onTabChange={setActiveTab}
           stats={stats}
         />
-
         <main className="main-content">
+          {error && <div className="error-message">{error}</div>}
           <OrdersList
             orders={filteredOrders}
             onStatusUpdate={handleStatusUpdate}
-            isLoading={isLoading}
-            error={error}
+            isLoading={isLoading && orders.length === 0} // Show loading only if no orders yet
+            error={!error && orders.length === 0 && !isLoading ? "No orders to display." : null} // Adjusted error prop for OrdersList
             showCompleted={activeTab === "completed"}
           />
         </main>
