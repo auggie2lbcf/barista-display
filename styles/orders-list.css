@@ -1,0 +1,13 @@
+/* styles/orders-list.css */
+.orders-list {
+  display: flex;
+  flex-direction: row;
+  gap: var(--spacing-md);
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: var(--spacing-sm);
+  width: 100%;
+  flex-grow: 1;
+  min-height: 100px;
+}

@@ -1,0 +1,32 @@
+/* styles/layout.css */
+.container {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.main-content {
+  flex: 1;
+  overflow-y: hidden;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  padding: var(--spacing-sm);
+  background-color: var(--color-background);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Scrollbar hiding utilities (can also be in utilities.css if preferred) */
+.main-content::-webkit-scrollbar,
+.orders-list::-webkit-scrollbar,
+.line-items::-webkit-scrollbar { /* Added .line-items here */
+  display: none;
+}
+.main-content,
+.orders-list,
+.line-items { /* Added .line-items here */
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

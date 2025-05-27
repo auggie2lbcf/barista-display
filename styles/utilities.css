@@ -1,0 +1,42 @@
+/* styles/utilities.css */
+.global-error-message {
+  background: var(--color-error-bg);
+  border: 1px solid var(--color-error-border);
+  color: var(--color-error);
+  padding: var(--spacing-sm);
+  border-radius: var(--border-radius-md);
+  margin: 0 0 var(--spacing-sm);
+  font-size: var(--font-size-sm);
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.loading-state,
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: var(--spacing-lg) var(--spacing-md);
+  color: var(--color-text-secondary);
+  width: 100%;
+  flex-grow: 1;
+  min-height: 150px;
+}
+
+.empty-state h3 {
+  font-size: var(--font-size-md);
+  font-weight: 600;
+  margin-bottom: var(--spacing-xs);
+  color: var(--color-text-primary);
+}
+
+.empty-state p {
+  font-size: var(--font-size-sm);
+}
+
+.loading-state {
+  font-size: var(--font-size-md);
+  font-weight: 600;
+}

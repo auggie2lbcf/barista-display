@@ -1,0 +1,81 @@
+/* styles/variables.css */
+:root {
+  /* Colors */
+  --color-primary: #6b4423;
+  --color-primary-light: #8b5a3c;
+  --color-primary-active: #5a371d;
+  --color-secondary: #3b82f6;
+  --color-secondary-active: #2563eb;
+  --color-success: #10b981;
+  --color-success-active: #059669;
+  --color-neutral: #6b7280;
+  --color-neutral-active: #4b5563;
+  --color-white: #ffffff;
+  --color-black: #000000;
+
+  /* Text Colors */
+  --color-text-primary: #333333;
+  --color-text-secondary: #6b7280;
+  --color-text-dark: #111827;
+  --color-text-light: var(--color-white);
+  --color-text-error: #dc2626;
+  --color-text-link: var(--color-primary);
+
+  /* Backgrounds */
+  --color-background: #f0f0f0;
+  --color-surface: var(--color-white);
+  --color-surface-alt: #fafafa;
+  --color-surface-hover: #f3f4f6;
+  --color-surface-active-tab: rgba(255, 255, 255, 0.15);
+
+  /* Error State Colors */
+  --color-error: var(--color-text-error);
+  --color-error-bg: #fef2f2;
+  --color-error-border: #fecaca;
+
+  /* Status Specific Colors */
+  --status-new-bg: #fef3c7;
+  --status-new-text: #92400e;
+  --status-inprogress-bg: var(--status-new-bg);
+  --status-inprogress-text: var(--status-new-text);
+  --status-completed-bg: #e5e7eb;
+  --status-completed-text: #374151;
+  --status-unknown-bg: #f3f4f6;
+  --status-unknown-text: #4b5563;
+  --status-dot-online: #4ade80;
+  --status-dot-offline: #ef4444;
+  --status-dot-connecting: #f59e0b;
+
+  /* Font Sizes */
+  --font-size-base-px: 14px;
+  --font-size-xxs: 0.65rem;
+  --font-size-xs: 0.78rem;
+  --font-size-sm: 0.85rem;
+  --font-size-base: 1rem;
+  --font-size-md: 1.07rem;
+  --font-size-lg: 1.21rem;
+  --font-size-xl: 1.35rem;
+
+  /* Spacing */
+  --spacing-xxs: 0.1rem;
+  --spacing-xs: 0.21rem;
+  --spacing-sm: 0.35rem;
+  --spacing-md: 0.5rem;
+  --spacing-lg: 0.71rem;
+  --spacing-xl: 1.07rem;
+  --spacing-xxl: 1.42rem;
+
+  /* Borders & Shadows */
+  --border-radius-sm: 3px;
+  --border-radius-md: 6px;
+  --border-radius-lg: 9px;
+  --border-radius-pill: 9999px;
+  --box-shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --box-shadow-md: 0 2px 4px -1px rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --box-shadow-lg: 0 5px 8px -2px rgb(0 0 0 / 0.1), 0 2px 3px -2px rgb(0 0 0 / 0.1);
+
+  /* Touch Targets */
+  --touch-target-min-height: 36px;
+  --touch-target-min-height-lg: 40px;
+  --touch-target-min-width: 36px;
+}

@@ -1,0 +1,125 @@
+/* styles/header.css */
+.header {
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
+  color: var(--color-text-light);
+  padding: var(--spacing-sm) var(--spacing-md);
+  flex-shrink: 0;
+  box-shadow: var(--box-shadow-md);
+  z-index: 10;
+}
+
+.header-main-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.header-tabs-container {
+  flex-grow: 1;
+  overflow: hidden;
+}
+
+.header-controls {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  flex-shrink: 0;
+}
+
+.connection-status {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  font-size: var(--font-size-xs);
+  white-space: nowrap;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+.status-dot.online { background-color: var(--status-dot-online); }
+.status-dot.offline { background-color: var(--status-dot-offline); }
+.status-dot.connecting { background-color: var(--status-dot-connecting); }
+
+.refresh-btn {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: var(--color-text-light);
+  border-radius: var(--border-radius-sm);
+  padding: var(--spacing-xs);
+  font-size: var(--font-size-md);
+  font-weight: normal;
+  min-height: var(--touch-target-min-width);
+  min-width: var(--touch-target-min-width);
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.refresh-btn:active {
+  background: rgba(255, 255, 255, 0.15);
+  transform: scale(0.95);
+}
+.refresh-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Tabs styles (as they are part of the header) */
+.tabs {
+  display: flex;
+  flex-shrink: 1;
+  overflow-x: hidden;
+}
+
+.tab-button {
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: none;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  min-height: var(--touch-target-min-height);
+  cursor: pointer;
+  transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+  border-bottom: 2px solid transparent;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-grow: 0;
+  flex-shrink: 1;
+}
+
+.tab-button.active {
+  color: var(--color-white);
+  border-bottom-color: var(--color-white);
+  background-color: var(--color-surface-active-tab);
+  font-weight: 600;
+}
+
+.tab-button:not(.active):hover {
+  background-color: rgba(255, 255, 255, 0.08);
+  color: var(--color-white);
+}
+
+.tab-button:not(.active):active {
+  background-color: rgba(255, 255, 255, 0.12);
+}
+
+.tab-count {
+  margin-left: var(--spacing-xs);
+  font-size: var(--font-size-xs);
+  font-weight: normal;
+  color: rgba(255, 255, 255, 0.6);
+}
+.tab-button.active .tab-count {
+  color: var(--color-white);
+}

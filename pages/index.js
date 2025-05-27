@@ -1,8 +1,8 @@
 // pages/index.js
-import React, { useState, useEffect, useCallback, useMemo } from "react"; // Removed useRef
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import Head from "next/head";
 import HeaderDisplay from "../components/HeaderDisplay";
-import OrderTabs from "../components/OrderTabs";
+// OrderTabs is no longer imported here directly for rendering in main body
 import OrdersList from "../components/OrdersList";
 import { CONFIG, ORDER_STATUS } from "../lib/config";
 import { transformSquareOrder } from "../lib/orderUtils";
@@ -26,13 +26,11 @@ export default function HomePage() {
   const [error, setError] = useState(null);
   const [connectionStatus, setConnectionStatus] = useState(CONNECTION_STATUS.CONNECTING);
 
-  // Removed: scrollableContainerRef, isDraggingRef, dragStartCoordsRef, scrollStartCoordsRef
-
   const stats = useMemo(() => {
     const inprogressCount = orders.filter(order => order.status === ORDER_STATUS.IN_PROGRESS).length;
     const completedCount = orders.filter(order => order.status === ORDER_STATUS.COMPLETED).length;
     return {
-      total: inprogressCount,
+      total: inprogressCount, // Assuming total refers to in-progress for the main stat display
       inprogress: inprogressCount,
       completed: completedCount,
     };
@@ -67,8 +65,6 @@ export default function HomePage() {
     return () => clearInterval(intervalId);
   }, [loadOrders]);
 
-  // Removed: useEffect for handling drag-to-scroll (mouse and touch)
-
   const filteredOrders = useMemo(() => {
     let newFilteredList = [];
     if (activeTab === TAB_OPTIONS.IN_PROGRESS) {
@@ -99,7 +95,7 @@ export default function HomePage() {
 
     if (typeof orderToUpdate.version === 'undefined') {
       setError("Error: Order version is missing. Please refresh.");
-      await loadOrders(true);
+      await loadOrders(true); // Pass true for manual refresh
       return;
     }
 
@@ -114,7 +110,7 @@ export default function HomePage() {
 
     try {
       await updateSquareOrder(orderId, orderToUpdate.version, orderToUpdate.fulfillmentId);
-      await loadOrders(true);
+      await loadOrders(true); // Pass true for manual refresh
     } catch (err) {
       console.error("Error updating Square order:", err);
       setOrders(originalOrders);
@@ -123,12 +119,12 @@ export default function HomePage() {
       } else {
         setError(`Failed to update order: ${err.message}. Please try refreshing.`);
       }
-      await loadOrders(true);
+      await loadOrders(true); // Pass true for manual refresh
     }
   };
   
   const getEmptyStateMessage = () => {
-    if (isLoading && orders.length === 0) return null;
+    if (isLoading && orders.length === 0) return null; // Don't show empty if initial load is happening
     if (filteredOrders.length === 0) {
       return activeTab === TAB_OPTIONS.COMPLETED
         ? "No completed orders found."
@@ -150,22 +146,20 @@ export default function HomePage() {
         <HeaderDisplay
           connectionStatus={connectionStatus}
           stats={stats}
-          onRefresh={() => loadOrders(true)}
+          onRefresh={() => loadOrders(true)} // Pass true for manual refresh
           isLoading={isLoading}
-        />
-        <OrderTabs
+          // Pass tab props to HeaderDisplay
           activeTab={activeTab}
           onTabChange={setActiveTab}
-          stats={stats}
           tabOptions={TAB_OPTIONS}
         />
-        {/* The main element no longer needs a ref for scrolling here */}
+        {/* OrderTabs component is now rendered inside HeaderDisplay */}
         <main className="main-content">
           {error && <div className="error-message global-error-message">{error}</div>}
           <OrdersList
             orders={filteredOrders}
             onStatusUpdate={handleStatusUpdate}
-            isLoading={isLoading && orders.length === 0}
+            isLoading={isLoading && orders.length === 0} // Show loading only if no orders yet
             emptyStateMessage={getEmptyStateMessage()}
             showCompleted={activeTab === TAB_OPTIONS.COMPLETED}
           />
