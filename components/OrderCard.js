@@ -1,15 +1,14 @@
 // components/OrderCard.js
 import React from "react";
-import { ORDER_STATUS } from "../lib/config";
-import { formatTime, formatCurrency } from "../lib/orderUtils"; // Import utility functions
+import { ORDER_STATUS } from "../lib/config"; //
+import { formatTime, formatCurrency } from "../lib/orderUtils"; //
 
 const OrderStatusBadge = ({ status }) => {
   const statusMap = {
-    [ORDER_STATUS.IN_PROGRESS]: { label: "In Progress", class: "status-inprogress" },
-    [ORDER_STATUS.COMPLETED]: { label: "Completed", class: "status-completed" },
-    // Add other statuses if needed
+    [ORDER_STATUS.IN_PROGRESS]: { label: "In Progress", class: "status-inprogress" }, //
+    [ORDER_STATUS.COMPLETED]: { label: "Completed", class: "status-completed" }, //
   };
-  const displayInfo = statusMap[status] || { label: status, class: "status-unknown" }; // Default for unknown
+  const displayInfo = statusMap[status] || { label: status, class: "status-unknown" };
 
   return (
     <div className={`status-badge ${displayInfo.class}`}>
@@ -18,54 +17,18 @@ const OrderStatusBadge = ({ status }) => {
   );
 };
 
-const LineItem = ({ item }) => (
-  <div className="line-item-detailed">
-    <div className="item-header">
-      <div className="item-main-info">
-        <span className="item-name" title={item.name}>{item.name}</span>
-        <span className="item-quantity">×{item.quantity}</span>
-      </div>
-      {item.price > 0 && (
-        <span className="item-price">{formatCurrency(item.price)}</span>
-      )}
-    </div>
-
-    {item.variationName && (
-      <div className="item-variation">
-        <span className="variation-label">Type:</span>
-        <span className="variation-name">{item.variationName}</span>
-      </div>
-    )}
-
-    {item.modifiers && item.modifiers.length > 0 && (
-      <div className="item-modifiers">
-        {item.modifiers.map((modifier, modIndex) => (
-          <div key={modIndex} className="modifier-item">
-            <span className="modifier-name">
-              {modifier.quantity > 1 ? `${modifier.quantity}× ` : ""}
-              {modifier.name}
-            </span>
-            {modifier.price > 0 && (
-              <span className="modifier-price">
-                +{formatCurrency(modifier.price)}
-              </span>
-            )}
-          </div>
-        ))}
-      </div>
-    )}
-
-    {item.note && (
-      <div className="item-note">
-        <span className="note-label">Item Note:</span>
-        <span className="note-text">{item.note}</span>
-      </div>
-    )}
+// Simplified LineItem for card overview
+const OverviewLineItem = ({ item }) => (
+  <div className="overview-line-item">
+    <span className="item-quantity-overview">{item.quantity}×</span>
+    <span className="item-name-overview" title={item.name}>{item.name}</span>
+    {/* Optionally show variation if it's very short, or omit for overview */}
+    {item.variationName && <span className="item-variation-overview">({item.variationName})</span>}
   </div>
 );
 
 
-const OrderCard = ({ order, onStatusUpdate, showCompleted = false }) => {
+const OrderCard = ({ order, onStatusUpdate, showCompleted = false, onOrderSelect }) => {
   if (!order) return null;
 
   const {
@@ -81,27 +44,42 @@ const OrderCard = ({ order, onStatusUpdate, showCompleted = false }) => {
   } = order;
 
   const renderActionButton = () => {
-    if (showCompleted || status === ORDER_STATUS.COMPLETED) {
-      return null; // No action buttons for completed orders in either tab
+    if (showCompleted || status === ORDER_STATUS.COMPLETED) { //
+      return null; 
     }
 
-    if (status === ORDER_STATUS.IN_PROGRESS) {
+    if (status === ORDER_STATUS.IN_PROGRESS) { //
       return (
         <button
           type="button"
           className="action-button btn-done"
-          onClick={() => onStatusUpdate(id, ORDER_STATUS.COMPLETED)}
+          onClick={(e) => {
+            e.stopPropagation(); // Prevent card click when clicking button
+            onStatusUpdate(id, ORDER_STATUS.COMPLETED); //
+          }}
           aria-label={`Mark order ${displayId} as completed`}
         >
           Complete
         </button>
       );
     }
-    return null; // Default to no button if status is not 'inprogress'
+    return null; 
+  };
+  
+  const handleCardClick = () => {
+    if (onOrderSelect) {
+      onOrderSelect(order);
+    }
   };
 
   return (
-    <div className={`order-card ${showCompleted ? 'completed-order' : 'inprogress-order'}`}>
+    <div 
+      className={`order-card ${showCompleted ? 'completed-order' : 'inprogress-order'}`}
+      onClick={handleCardClick} // Added click handler
+      role="button" // Make it accessible as a button
+      tabIndex={0} // Make it focusable
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleCardClick(); }} // Keyboard accessible
+    >
       <div className="order-header">
         <div className="order-info">
           <div className="order-id">Order #{displayId}</div>
@@ -120,17 +98,24 @@ const OrderCard = ({ order, onStatusUpdate, showCompleted = false }) => {
         <OrderStatusBadge status={status} />
       </div>
 
-      {lineItems.length > 0 && (
-        <div className="line-items">
-          {lineItems.map((item, index) => (
-            <LineItem key={`${id}-item-${index}`} item={item} />
-          ))}
-        </div>
-      )}
+      {/* Item Overview Section */}
+      <div className="order-items-overview">
+        {lineItems.length > 0 ? (
+          lineItems.slice(0, 3).map((item, index) => ( // Show first 3 items as overview
+            <OverviewLineItem key={`${id}-overview-item-${index}`} item={item} />
+          ))
+        ) : (
+          <p className="no-items-overview">No items</p>
+        )}
+        {lineItems.length > 3 && (
+          <p className="more-items-indicator">...and {lineItems.length - 3} more item(s)</p>
+        )}
+      </div>
+
 
       {orderNotes && (
-        <div className="order-notes">
-          <strong>Order Note:</strong> {orderNotes}
+        <div className="order-notes-overview">
+          <strong>Note:</strong> {orderNotes.substring(0, 50)}{orderNotes.length > 50 ? "..." : ""}
         </div>
       )}
 

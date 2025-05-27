@@ -1,4 +1,133 @@
 /* styles/order-card.css */
+
+/* styles/order-card.css */
+
+/* ... (existing styles) ... */
+
+/* styles/order-card.css */
+
+/* ... (other styles) ... */
+
+.order-card {
+  background: var(--color-surface);
+  border-radius: var(--border-radius-md);
+  padding: var(--spacing-md);
+  box-shadow: var(--box-shadow-sm);
+  border: 1px solid var(--color-border); /* Define --color-border in variables.css if not present */
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+  /* Adjusted min-width for potentially wider cards on small screens */
+  min-width: 280px; /* Original: 270px. Responsive CSS might override this. */
+  max-width: 340px; /* Original: 320px. */
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  height: calc(100% - var(--spacing-sm));
+  /* Adjusted max-height to accommodate larger fonts/spacing */
+  max-height: 420px; /* Original: 380px. This will be constrained by .orders-list height */
+  cursor: pointer;
+}
+
+/* ... (rest of the file) ... */
+
+.order-items-overview {
+  margin: var(--spacing-sm) 0;
+  font-size: var(--font-size-sm); /* Ensure this scales up */
+  color: var(--color-text-secondary);
+  max-height: 70px; /* Original: 60px, allow a bit more space for larger text */
+  overflow: hidden;
+}
+
+/* ... */
+
+.line-items { /* This is the detailed view within the OrderCard if kept, now used in modal */
+  margin: var(--spacing-sm) 0;
+  flex-grow: 1;
+  overflow-y: auto;
+  max-height: 150px; /* Original: 140px. Adjust if items still feel cramped */
+  padding-right: var(--spacing-xs); /* For scrollbar */
+}
+
+/* ... */
+
+.action-button {
+  width: 100%;
+  padding: var(--spacing-md) var(--spacing-lg); /* Increased padding */
+  border: none;
+  border-radius: var(--border-radius-md);
+  font-size: var(--font-size-md); /* Increased font size */
+  font-weight: 600;
+  min-height: var(--touch-target-min-height-lg); /* Uses updated variable */
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: var(--spacing-md);
+  flex-shrink: 0;
+}
+
+/* ... (rest of existing styles) ... */
+.order-card {
+  /* ... */
+  cursor: pointer; /* Make it look clickable */
+  /* ... */
+}
+
+.order-items-overview {
+  margin: var(--spacing-sm) 0;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  max-height: 60px; /* Adjust as needed */
+  overflow: hidden;
+}
+
+.overview-line-item {
+  display: flex;
+  gap: var(--spacing-xs);
+  margin-bottom: var(--spacing-xxs);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.item-quantity-overview {
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+.item-name-overview {
+  flex-grow: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.item-variation-overview {
+  color: var(--color-text-secondary);
+  font-style: italic;
+  margin-left: var(--spacing-xs);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 1; /* Allow shrinking if space is tight */
+  max-width: 50%; /* Prevent variation from taking too much space */
+}
+
+.more-items-indicator {
+  font-style: italic;
+  margin-top: var(--spacing-xs);
+}
+.no-items-overview {
+    font-style: italic;
+}
+
+.order-notes-overview {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  font-style: italic;
+  margin-top: var(--spacing-xs);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+
+/* ... (rest of existing styles) ... */
 .order-card {
   background: var(--color-surface);
   border-radius: var(--border-radius-md);

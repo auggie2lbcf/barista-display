@@ -1,136 +1,149 @@
 // pages/index.js
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import Head from "next/head";
-import HeaderDisplay from "../components/HeaderDisplay";
-// OrderTabs is no longer imported here directly for rendering in main body
-import OrdersList from "../components/OrdersList";
-import { CONFIG, ORDER_STATUS } from "../lib/config";
-import { transformSquareOrder } from "../lib/orderUtils";
-import { fetchOrdersFromSquare, updateSquareOrder } from "../lib/squareService";
+import HeaderDisplay from "../components/HeaderDisplay"; //
+import OrdersList from "../components/OrdersList"; //
+import OrderDetailModal from "../components/OrderDetailModal"; //
+import { CONFIG, ORDER_STATUS } from "../lib/config"; //
+import { transformSquareOrder } from "../lib/orderUtils"; //
+import { fetchOrdersFromSquare, updateSquareOrder } from "../lib/squareService"; //
 
-const CONNECTION_STATUS = {
-  CONNECTED: "connected",
-  ERROR: "error",
-  CONNECTING: "connecting",
+const CONNECTION_STATUS = { //
+  CONNECTED: "connected", //
+  ERROR: "error", //
+  CONNECTING: "connecting", //
 };
 
-const TAB_OPTIONS = {
-  IN_PROGRESS: "inprogress",
-  COMPLETED: "completed",
+const TAB_OPTIONS = { //
+  IN_PROGRESS: "inprogress", //
+  COMPLETED: "completed", //
 };
 
-export default function HomePage() {
-  const [orders, setOrders] = useState([]);
-  const [activeTab, setActiveTab] = useState(TAB_OPTIONS.IN_PROGRESS);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [connectionStatus, setConnectionStatus] = useState(CONNECTION_STATUS.CONNECTING);
+export default function HomePage() { //
+  const [orders, setOrders] = useState([]); //
+  const [activeTab, setActiveTab] = useState(TAB_OPTIONS.IN_PROGRESS); //
+  const [isLoading, setIsLoading] = useState(false); //
+  const [error, setError] = useState(null); //
+  const [connectionStatus, setConnectionStatus] = useState(CONNECTION_STATUS.CONNECTING); //
 
-  const stats = useMemo(() => {
-    const inprogressCount = orders.filter(order => order.status === ORDER_STATUS.IN_PROGRESS).length;
-    const completedCount = orders.filter(order => order.status === ORDER_STATUS.COMPLETED).length;
-    return {
-      total: inprogressCount, // Assuming total refers to in-progress for the main stat display
-      inprogress: inprogressCount,
-      completed: completedCount,
+  const [selectedOrder, setSelectedOrder] = useState(null); //
+  const [isModalOpen, setIsModalOpen] = useState(false); //
+
+  const stats = useMemo(() => { //
+    const inprogressCount = orders.filter(order => order.status === ORDER_STATUS.IN_PROGRESS).length; //
+    const completedCount = orders.filter(order => order.status === ORDER_STATUS.COMPLETED).length; //
+    return { //
+      total: inprogressCount, //
+      inprogress: inprogressCount, //
+      completed: completedCount, //
     };
-  }, [orders]);
+  }, [orders]); //
 
-  const loadOrders = useCallback(async (isManualRefresh = false) => {
-    if (!isManualRefresh) setIsLoading(true);
-    setError(null);
-    setConnectionStatus(CONNECTION_STATUS.CONNECTING);
+  const loadOrders = useCallback(async (isManualRefresh = false) => { //
+    if (!isManualRefresh) setIsLoading(true); //
+    setError(null); //
+    setConnectionStatus(CONNECTION_STATUS.CONNECTING); //
 
-    try {
-      const rawOrders = await fetchOrdersFromSquare();
-      const transformed = rawOrders.map(transformSquareOrder).filter(Boolean);
-      setOrders(transformed);
-      setConnectionStatus(CONNECTION_STATUS.CONNECTED);
-    } catch (err) {
-      console.error("Error fetching orders:", err);
-      setError(`Failed to fetch orders: ${err.message}`);
-      setConnectionStatus(CONNECTION_STATUS.ERROR);
-      setOrders([]);
-    } finally {
-      setIsLoading(false);
+    try { //
+      const rawOrders = await fetchOrdersFromSquare(); //
+      const transformed = rawOrders.map(transformSquareOrder).filter(Boolean); //
+      setOrders(transformed); //
+      setConnectionStatus(CONNECTION_STATUS.CONNECTED); //
+    } catch (err) { //
+      console.error("Error fetching orders:", err); //
+      setError(`Failed to fetch orders: ${err.message}`); //
+      setConnectionStatus(CONNECTION_STATUS.ERROR); //
+      setOrders([]); //
+    } finally { //
+      setIsLoading(false); //
     }
-  }, []);
+  }, []); //
 
-  useEffect(() => {
-    loadOrders();
-    const intervalId = setInterval(
-      () => loadOrders(),
-      CONFIG.REFRESH_INTERVAL_SECONDS_CONFIG * 1000
+  useEffect(() => { //
+    loadOrders(); //
+    const intervalId = setInterval( //
+      () => loadOrders(), //
+      CONFIG.REFRESH_INTERVAL_SECONDS_CONFIG * 1000 //
     );
-    return () => clearInterval(intervalId);
-  }, [loadOrders]);
+    return () => clearInterval(intervalId); //
+  }, [loadOrders]); //
 
-  const filteredOrders = useMemo(() => {
-    let newFilteredList = [];
-    if (activeTab === TAB_OPTIONS.IN_PROGRESS) {
-      newFilteredList = orders.filter((order) => order.status === ORDER_STATUS.IN_PROGRESS);
-    } else if (activeTab === TAB_OPTIONS.COMPLETED) {
-      newFilteredList = orders.filter((order) => order.status === ORDER_STATUS.COMPLETED);
+  const filteredOrders = useMemo(() => { //
+    let newFilteredList = []; //
+    if (activeTab === TAB_OPTIONS.IN_PROGRESS) { //
+      newFilteredList = orders.filter((order) => order.status === ORDER_STATUS.IN_PROGRESS); //
+    } else if (activeTab === TAB_OPTIONS.COMPLETED) { //
+      newFilteredList = orders.filter((order) => order.status === ORDER_STATUS.COMPLETED); //
     }
 
-    if (activeTab === TAB_OPTIONS.COMPLETED) {
-      return newFilteredList.sort((a, b) =>
+    if (activeTab === TAB_OPTIONS.COMPLETED) { //
+      return newFilteredList.sort((a, b) => //
         new Date(b.completedAt || b.timestamp) - new Date(a.completedAt || a.timestamp)
       );
     }
-    return newFilteredList.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
-  }, [orders, activeTab]);
+    return newFilteredList.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp)); //
+  }, [orders, activeTab]); //
 
-  const handleStatusUpdate = async (orderId, newStatus) => {
-    if (newStatus !== ORDER_STATUS.COMPLETED) {
-      setError("Invalid status update. Only 'completed' is allowed for now.");
-      return;
+  const handleStatusUpdate = async (orderId, newStatus) => { //
+    if (newStatus !== ORDER_STATUS.COMPLETED) { //
+      setError("Invalid status update. Only 'completed' is allowed for now."); //
+      return; //
     }
 
-    const orderToUpdate = orders.find(o => o.id === orderId);
-    if (!orderToUpdate) {
-      setError("Error: Could not find the order to update.");
-      return;
+    const orderToUpdate = orders.find(o => o.id === orderId); //
+    if (!orderToUpdate) { //
+      setError("Error: Could not find the order to update."); //
+      return; //
     }
 
-    if (typeof orderToUpdate.version === 'undefined') {
-      setError("Error: Order version is missing. Please refresh.");
-      await loadOrders(true); // Pass true for manual refresh
-      return;
+    if (typeof orderToUpdate.version === 'undefined') { //
+      setError("Error: Order version is missing. Please refresh."); //
+      await loadOrders(true); //
+      return; //
     }
 
-    const originalOrders = [...orders];
-    setOrders(prevOrders =>
-      prevOrders.map(order =>
-        order.id === orderId
-          ? { ...order, status: newStatus, completedAt: new Date().toISOString() }
-          : order
+    const originalOrders = [...orders]; //
+    setOrders(prevOrders => //
+      prevOrders.map(order => //
+        order.id === orderId //
+          ? { ...order, status: newStatus, completedAt: new Date().toISOString() } //
+          : order //
       )
     );
 
-    try {
-      await updateSquareOrder(orderId, orderToUpdate.version, orderToUpdate.fulfillmentId);
-      await loadOrders(true); // Pass true for manual refresh
-    } catch (err) {
-      console.error("Error updating Square order:", err);
-      setOrders(originalOrders);
-      if (err.message.includes("VERSION_MISMATCH")) {
-        setError("Order was updated elsewhere. Refreshing orders. Please try again.");
-      } else {
-        setError(`Failed to update order: ${err.message}. Please try refreshing.`);
+    try { //
+      await updateSquareOrder(orderId, orderToUpdate.version, orderToUpdate.fulfillmentId); //
+      await loadOrders(true); //
+    } catch (err) { //
+      console.error("Error updating Square order:", err); //
+      setOrders(originalOrders); //
+      if (err.message.includes("VERSION_MISMATCH")) { //
+        setError("Order was updated elsewhere. Refreshing orders. Please try again."); //
+      } else { //
+        setError(`Failed to update order: ${err.message}. Please try refreshing.`); //
       }
-      await loadOrders(true); // Pass true for manual refresh
+      await loadOrders(true); //
     }
   };
   
-  const getEmptyStateMessage = () => {
-    if (isLoading && orders.length === 0) return null; // Don't show empty if initial load is happening
-    if (filteredOrders.length === 0) {
-      return activeTab === TAB_OPTIONS.COMPLETED
-        ? "No completed orders found."
-        : "No in-progress orders found.";
+  const getEmptyStateMessage = () => { //
+    if (isLoading && orders.length === 0) return null; //
+    if (filteredOrders.length === 0) { //
+      return activeTab === TAB_OPTIONS.COMPLETED //
+        ? "No completed orders found." //
+        : "No in-progress orders found."; //
     }
-    return null;
+    return null; //
+  };
+
+  const handleOrderSelect = (order) => { //
+    setSelectedOrder(order); //
+    setIsModalOpen(true); //
+  };
+
+  const handleCloseModal = () => { //
+    setIsModalOpen(false); //
+    setSelectedOrder(null); //
   };
 
   return (
@@ -144,27 +157,34 @@ export default function HomePage() {
 
       <div className="container">
         <HeaderDisplay
-          connectionStatus={connectionStatus}
-          stats={stats}
-          onRefresh={() => loadOrders(true)} // Pass true for manual refresh
-          isLoading={isLoading}
-          // Pass tab props to HeaderDisplay
-          activeTab={activeTab}
-          onTabChange={setActiveTab}
-          tabOptions={TAB_OPTIONS}
+          connectionStatus={connectionStatus} //
+          stats={stats} //
+          onRefresh={() => loadOrders(true)}  //
+          isLoading={isLoading} //
+          activeTab={activeTab} //
+          onTabChange={setActiveTab} //
+          tabOptions={TAB_OPTIONS} //
         />
-        {/* OrderTabs component is now rendered inside HeaderDisplay */}
         <main className="main-content">
           {error && <div className="error-message global-error-message">{error}</div>}
           <OrdersList
-            orders={filteredOrders}
-            onStatusUpdate={handleStatusUpdate}
-            isLoading={isLoading && orders.length === 0} // Show loading only if no orders yet
-            emptyStateMessage={getEmptyStateMessage()}
-            showCompleted={activeTab === TAB_OPTIONS.COMPLETED}
+            orders={filteredOrders} //
+            onStatusUpdate={handleStatusUpdate} //
+            isLoading={isLoading && orders.length === 0}  //
+            emptyStateMessage={getEmptyStateMessage()} //
+            showCompleted={activeTab === TAB_OPTIONS.COMPLETED} //
+            onOrderSelect={handleOrderSelect} //
           />
         </main>
       </div>
+      
+      {isModalOpen && selectedOrder && ( //
+        <OrderDetailModal 
+          order={selectedOrder} 
+          onClose={handleCloseModal} 
+          onStatusUpdate={handleStatusUpdate} // Pass handleStatusUpdate here
+        />
+      )}
     </>
   );
 }

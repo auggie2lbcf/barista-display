@@ -1,4 +1,57 @@
 /* styles/header.css */
+
+/* styles/header.css */
+/* ... (other styles) ... */
+
+.header {
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
+  color: var(--color-text-light);
+  padding: var(--spacing-md) var(--spacing-lg); /* Uses updated spacing */
+  flex-shrink: 0;
+  box-shadow: var(--box-shadow-md);
+  z-index: 10;
+}
+
+/* ... */
+
+.status-dot {
+  width: 10px;  /* Original: 8px */
+  height: 10px; /* Original: 8px */
+  border-radius: 50%;
+}
+/* ... */
+
+.refresh-btn {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: var(--color-text-light);
+  border-radius: var(--border-radius-sm);
+  padding: var(--spacing-sm); /* Increased padding */
+  font-size: var(--font-size-lg); /* Increased icon/text size */
+  font-weight: normal;
+  min-height: var(--touch-target-min-width); /* Uses updated variable */
+  min-width: var(--touch-target-min-width);  /* Uses updated variable */
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+/* ... */
+.tab-button {
+  padding: var(--spacing-md) var(--spacing-lg); /* Uses updated spacing, ensure it's not too large */
+  border: none;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: var(--font-size-base); /* Uses updated font size */
+  font-weight: 500;
+  min-height: var(--touch-target-min-height); /* Uses updated variable */
+  /* ... */
+}
+
+/* ... (rest of existing styles) ... */
 .header {
   background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
   color: var(--color-text-light);

@@ -47,35 +47,40 @@
   --status-dot-connecting: #f59e0b;
 
   /* Font Sizes */
-  --font-size-base-px: 14px;
-  --font-size-xxs: 0.65rem;
-  --font-size-xs: 0.78rem;
-  --font-size-sm: 0.85rem;
+  /* Increased base font size for better readability on small screens */
+  --font-size-base-px: 16px; /* Original: 14px */
+  /* Relative font sizes will scale accordingly. You might want to fine-tune these if needed. */
+  --font-size-xxs: 0.7rem;   /* approx 0.65rem * (16/14) */
+  --font-size-xs: 0.85rem;    /* approx 0.78rem * (16/14) */
+  --font-size-sm: 0.9rem;    /* approx 0.85rem * (16/14) */
   --font-size-base: 1rem;
-  --font-size-md: 1.07rem;
-  --font-size-lg: 1.21rem;
-  --font-size-xl: 1.35rem;
+  --font-size-md: 1.1rem;    /* approx 1.07rem * (16/14) */
+  --font-size-lg: 1.25rem;   /* approx 1.21rem * (16/14) */
+  --font-size-xl: 1.4rem;    /* approx 1.35rem * (16/14) */
 
   /* Spacing */
-  --spacing-xxs: 0.1rem;
-  --spacing-xs: 0.21rem;
-  --spacing-sm: 0.35rem;
-  --spacing-md: 0.5rem;
-  --spacing-lg: 0.71rem;
-  --spacing-xl: 1.07rem;
-  --spacing-xxl: 1.42rem;
+  /* Increased spacing proportionally */
+  --spacing-xxs: 0.12rem;  /* approx 0.1rem * 1.15 */
+  --spacing-xs: 0.24rem;   /* approx 0.21rem * 1.15 */
+  --spacing-sm: 0.4rem;    /* approx 0.35rem * 1.15 */
+  --spacing-md: 0.57rem;   /* approx 0.5rem * 1.15 */
+  --spacing-lg: 0.8rem;    /* approx 0.71rem * 1.15 */
+  --spacing-xl: 1.2rem;    /* approx 1.07rem * 1.15 */
+  --spacing-xxl: 1.6rem;   /* approx 1.42rem * 1.15 */
+
 
   /* Borders & Shadows */
-  --border-radius-sm: 3px;
-  --border-radius-md: 6px;
-  --border-radius-lg: 9px;
+  --border-radius-sm: 4px; /* Original: 3px */
+  --border-radius-md: 8px; /* Original: 6px */
+  --border-radius-lg: 12px;/* Original: 9px */
   --border-radius-pill: 9999px;
   --box-shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
   --box-shadow-md: 0 2px 4px -1px rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
   --box-shadow-lg: 0 5px 8px -2px rgb(0 0 0 / 0.1), 0 2px 3px -2px rgb(0 0 0 / 0.1);
 
   /* Touch Targets */
-  --touch-target-min-height: 36px;
-  --touch-target-min-height-lg: 40px;
-  --touch-target-min-width: 36px;
+  /* Increased touch targets for easier interaction */
+  --touch-target-min-height: 44px;      /* Original: 36px */
+  --touch-target-min-height-lg: 48px;   /* Original: 40px */
+  --touch-target-min-width: 44px;       /* Original: 36px */
 }
