@@ -1,28 +1,32 @@
-import React, { useState, useEffect, useCallback } from "react";
+// pages/index.js
+import React, { useState, useEffect, useCallback, useRef } from "react"; // Added useRef
 import Head from "next/head";
 import HeaderDisplay from "../components/HeaderDisplay";
 import OrderTabs from "../components/OrderTabs";
 import OrdersList from "../components/OrdersList";
 import { CONFIG } from "../lib/config";
+// No need for DragDropContext if we are not reordering items
 
 export default function Home() {
+  // ... (all your existing state and functions: orders, filteredOrders, activeTab, etc.)
   const [orders, setOrders] = useState([]);
   const [filteredOrders, setFilteredOrders] = useState([]);
-  const [activeTab, setActiveTab] = useState("inprogress"); // Default to inprogress
+  const [activeTab, setActiveTab] = useState("inprogress"); 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [connectionStatus, setConnectionStatus] = useState("connected");
 
+  const scrollableContainerRef = useRef(null); // Ref for the main content area
+
+  // ... (stats, transformSquareOrder, fetchOrders, useEffect for filtering, useEffect for fetching)
   const stats = React.useMemo(() => {
     const inprogress = orders.filter(order => order.status === "inprogress").length;
     const completed = orders.filter((order) => order.status === "completed").length;
-    // total will represent active (inprogress) orders for the "All" tab if we rename "inprogress" tab to "All Active"
-    // or simply be the inprogress count if we have "In Progress" and "Completed" tabs.
-    // For this simplification, "total" can be considered the count of "inprogress" orders.
     return { total: inprogress, inprogress, completed };
   }, [orders]);
 
   const transformSquareOrder = (order) => {
+    // ... (keep existing transformSquareOrder function)
     console.log("=== Processing Order ===");
     console.log("Order ID:", order.id);
     console.log("Order State:", order.state);
@@ -35,18 +39,15 @@ export default function Home() {
     const fulfillments = order.fulfillments || [];
     const lineItems = order.line_items || [];
 
-    let status = "inprogress"; // Default to inprogress
+    let status = "inprogress"; 
     let completedAt = null;
 
     if (order.state === "COMPLETED") {
       status = "completed";
       completedAt = order.updated_at || order.created_at;
     } else if (order.state === "CANCELED") {
-      return null; // Skip canceled orders
+      return null; 
     } else {
-      // Any other "OPEN" state or relevant fulfillment state will be "inprogress"
-      // If specific Square fulfillment states should prevent "inprogress", add logic here.
-      // For now, if not COMPLETED or CANCELED, it's inprogress.
       if (fulfillments && fulfillments.length > 0) {
         const primaryFulfillment = fulfillments[0];
         if (primaryFulfillment.state === "COMPLETED") {
@@ -55,7 +56,6 @@ export default function Home() {
         } else if (primaryFulfillment.state === "CANCELED") {
             return null;
         }
-        // Other fulfillment states like PROPOSED, RESERVED, PREPARED all map to "inprogress"
       }
     }
     
@@ -103,6 +103,7 @@ export default function Home() {
       squareFulfillmentState: fulfillments[0]?.state || null,
     };
   };
+
 
   const fetchOrders = useCallback(async () => {
     if (!CONFIG.SQUARE_LOCATION_ID_CONFIG) {
@@ -167,24 +168,22 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    let filtered = [];
+    let newFilteredList = [];
     if (activeTab === "inprogress") {
-      filtered = orders.filter((order) => order.status === "inprogress");
+      newFilteredList = orders.filter((order) => order.status === "inprogress");
     } else if (activeTab === "completed") {
-      filtered = orders.filter((order) => order.status === "completed");
+      newFilteredList = orders.filter((order) => order.status === "completed");
     }
 
     if (activeTab === "completed") {
-      filtered = filtered.sort((a, b) => 
+      newFilteredList = newFilteredList.sort((a, b) => 
         new Date(b.completedAt || b.timestamp) - new Date(a.completedAt || a.timestamp)
       );
-    } else { // "inprogress"
-      filtered = filtered.sort((a, b) => 
-        new Date(a.timestamp) - new Date(b.timestamp)
-      );
+    } else { 
+        newFilteredList = newFilteredList.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
     }
-    setFilteredOrders(filtered);
-  }, [orders, activeTab]);
+    setFilteredOrders(newFilteredList);
+  }, [orders, activeTab]); 
 
   useEffect(() => {
     fetchOrders();
@@ -193,8 +192,8 @@ export default function Home() {
   }, [fetchOrders]);
 
   const handleStatusUpdate = async (orderId, newStatus) => {
-    // We only allow updating to "completed"
-    if (newStatus !== "completed") {
+    // ... (keep existing handleStatusUpdate function)
+     if (newStatus !== "completed") {
         setError("Invalid status update. Only 'completed' is allowed.");
         return;
     }
@@ -208,21 +207,20 @@ export default function Home() {
 
     if (typeof orderToUpdate.version === 'undefined') {
       setError("Error: Order version is missing. Please refresh.");
-      fetchOrders(); // Force refresh
+      fetchOrders(); 
       return;
     }
 
-    const originalOrders = [...orders];
+    const originalOrders = [...orders]; 
 
-    setOrders((prevOrders) =>
-      prevOrders.map((order) => {
-        if (order.id === orderId) {
-          return { ...order, status: newStatus, completedAt: new Date().toISOString() };
-        }
-        return order;
-      })
-    );
-
+    const updateOrderState = (list) => list.map((order) => {
+      if (order.id === orderId) {
+        return { ...order, status: newStatus, completedAt: new Date().toISOString() };
+      }
+      return order;
+    });
+    setOrders(updateOrderState(orders));
+    
     const idempotencyKey = `complete-${orderId}-${Date.now()}`;
     
     try {
@@ -243,14 +241,12 @@ export default function Home() {
         requestBodyToProxy.body.order.fulfillments = [
           {
             uid: orderToUpdate.fulfillmentId,
-            state: "COMPLETED", // Directly set to Square's COMPLETED state
+            state: "COMPLETED", 
           },
         ];
       } else {
-        // If no fulfillmentId, update the order state directly to COMPLETED
         requestBodyToProxy.body.order.state = "COMPLETED";
       }
-
 
       const response = await fetch("/api/square-proxy", {
         method: "POST",
@@ -261,27 +257,84 @@ export default function Home() {
       if (!response.ok) {
         const errorResult = await response.json().catch(() => ({ detail: response.statusText }));
         console.error("Square update API error response:", errorResult);
-        // Handle version mismatch or other errors
         if (errorResult.errors?.some(e => e.code === "VERSION_MISMATCH")) {
           setError("Order was updated elsewhere. Refreshing orders. Please try again.");
-          fetchOrders();
+          fetchOrders(); 
         } else {
           setError(`Square API error: ${errorResult.errors?.[0]?.detail || errorResult.detail || "Unknown error"}`);
+          setOrders(originalOrders); 
         }
-        setOrders(originalOrders); // Revert optimistic update
         return;
       }
 
       const result = await response.json();
       console.log("Square order update successful:", result);
-      fetchOrders(); // Refresh orders to get the latest state and version
+      fetchOrders(); 
 
     } catch (error) {
       console.error("Error updating Square order:", error);
-      setOrders(originalOrders); // Revert optimistic update
+      setOrders(originalOrders);
       setError(`Failed to update order: ${error.message}. Please try refreshing.`);
     }
   };
+
+
+  // Drag to scroll logic
+  useEffect(() => {
+    const slider = scrollableContainerRef.current;
+    if (!slider) return;
+
+    let isDown = false;
+    let startX;
+    let startY; // To track vertical scroll position
+    let scrollLeft;
+    let scrollTop; // To track vertical scroll position
+
+    const onMouseDown = (e) => {
+      isDown = true;
+      slider.style.cursor = 'grabbing';
+      slider.style.userSelect = 'none'; // Prevent text selection while dragging
+      startX = e.pageX - slider.offsetLeft;
+      startY = e.pageY - slider.offsetTop; // Capture Y for vertical scroll
+      scrollLeft = slider.scrollLeft;
+      scrollTop = slider.scrollTop; // Capture scrollTop
+    };
+
+    const onMouseLeaveOrUp = () => {
+      isDown = false;
+      slider.style.cursor = 'grab';
+      slider.style.userSelect = ''; // Re-enable text selection
+    };
+
+    const onMouseMove = (e) => {
+      if (!isDown) return;
+      e.preventDefault();
+      const x = e.pageX - slider.offsetLeft;
+      const y = e.pageY - slider.offsetTop; // Get current Y
+      const walkX = (x - startX) * 1; // Multiplier can adjust scroll speed/sensitivity
+      const walkY = (y - startY) * 1; // Multiplier for Y scroll
+      slider.scrollLeft = scrollLeft - walkX;
+      slider.scrollTop = scrollTop - walkY; // Apply vertical scroll
+    };
+
+    slider.addEventListener('mousedown', onMouseDown);
+    slider.addEventListener('mouseleave', onMouseLeaveOrUp);
+    slider.addEventListener('mouseup', onMouseLeaveOrUp);
+    slider.addEventListener('mousemove', onMouseMove);
+
+    // Set initial cursor style
+    slider.style.cursor = 'grab';
+
+    return () => {
+      slider.removeEventListener('mousedown', onMouseDown);
+      slider.removeEventListener('mouseleave', onMouseLeaveOrUp);
+      slider.removeEventListener('mouseup', onMouseLeaveOrUp);
+      slider.removeEventListener('mousemove', onMouseMove);
+      slider.style.cursor = ''; // Reset cursor on unmount
+      slider.style.userSelect = ''; // Reset userSelect on unmount
+    };
+  }, [scrollableContainerRef]); // Re-run if the ref changes (though it shouldn't often)
+
 
   return (
     <>
@@ -291,7 +344,7 @@ export default function Home() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-
+      {/* No DragDropContext needed for this type of scrolling */}
       <div className="container">
         <HeaderDisplay
           connectionStatus={connectionStatus}
@@ -304,14 +357,16 @@ export default function Home() {
           onTabChange={setActiveTab}
           stats={stats}
         />
-        <main className="main-content">
+        {/* Assign the ref to the main content area */}
+        <main className="main-content" ref={scrollableContainerRef}>
           {error && <div className="error-message">{error}</div>}
           <OrdersList
             orders={filteredOrders}
             onStatusUpdate={handleStatusUpdate}
             isLoading={isLoading && orders.length === 0}
-            error={!error && orders.length === 0 && !isLoading ? "No orders to display." : null}
+            error={!error && filteredOrders.length === 0 && !isLoading ? (activeTab === "completed" ? "No completed orders found" : "No in-progress orders found.") : null}
             showCompleted={activeTab === "completed"}
+            // droppableId is not needed if not using react-beautiful-dnd
           />
         </main>
       </div>

@@ -4,7 +4,7 @@ const HeaderDisplay = ({ connectionStatus, stats, onRefresh, isLoading }) => {
   return (
     <header className="header">
       <div className="header-top">
-        <h1 className="app-title">☕ KDS</h1>
+        <h1 className="app-title">☕ The Vine Coffeehouse & Bakery</h1>
         <div className="connection-status">
           <div
             className={`status-dot ${

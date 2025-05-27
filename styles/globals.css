@@ -38,19 +38,19 @@
   --status-dot-offline: #ef4444;
 
   /* Font Sizes */
-  --font-size-xs: 0.75rem;    /* 12px */
-  --font-size-sm: 0.875rem;   /* 14px */
-  --font-size-base: 1rem;     /* 16px */
-  --font-size-md: 1.125rem;   /* 18px */
-  --font-size-lg: 1.25rem;    /* 20px */
+  --font-size-xs: 0.75rem; /* 12px */
+  --font-size-sm: 0.875rem; /* 14px */
+  --font-size-base: 1rem; /* 16px */
+  --font-size-md: 1.125rem; /* 18px */
+  --font-size-lg: 1.25rem; /* 20px */
 
   /* Spacing */
   --spacing-xxs: 0.125rem; /* 2px */
-  --spacing-xs: 0.25rem;   /* 4px */
-  --spacing-sm: 0.5rem;    /* 8px */
-  --spacing-md: 0.75rem;   /* 12px */
-  --spacing-lg: 1rem;      /* 16px */
-  --spacing-xl: 1.5rem;    /* 24px */
+  --spacing-xs: 0.25rem; /* 4px */
+  --spacing-sm: 0.5rem; /* 8px */
+  --spacing-md: 0.75rem; /* 12px */
+  --spacing-lg: 1rem; /* 16px */
+  --spacing-xl: 1.5rem; /* 24px */
 
   /* Borders */
   --border-radius-sm: 4px;
@@ -61,6 +61,7 @@
   /* Touch Targets */
   --touch-target-min-height: 44px; /* ~3rem */
   --touch-target-min-height-lg: 50px;
+  --touch-target-min-width: 44px; /* ~3rem */
 }
 
 /* Reset and base styles for 5-inch touchscreen */
@@ -86,7 +87,7 @@ body {
   background-color: var(--color-background);
   height: 100%;
   width: 100%;
-  overflow-x: hidden; /* Prevent horizontal scroll */
+  overflow-x: hidden; /* Prevent horizontal scroll on the body itself */
 
   /* Optimize for touch */
   -webkit-touch-callout: none;
@@ -111,7 +112,7 @@ body {
   height: 100vh; /* Use vh for viewport height */
   display: flex;
   flex-direction: column;
-  overflow: hidden; /* Main scrolling handled by .main-content */
+  overflow: hidden; /* Main scrolling handled by .main-content (vertical) and .orders-list (horizontal) */
 }
 
 /* Header optimized for small screen */
@@ -211,10 +212,15 @@ body {
   background: var(--color-surface);
   border-bottom: 1px solid var(--color-border);
   flex-shrink: 0;
+  /* Add these for horizontal scrolling if tabs exceed screen width */
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  white-space: nowrap; /* Keep tabs in a single line */
 }
 
 .tab-button {
-  flex: 1;
+  /* Removed flex: 1; to allow natural width and horizontal scrolling */
+  flex-shrink: 0; /* Prevent tabs from shrinking below their content size */
   padding: var(--spacing-md) var(--spacing-xs); /* Adjusted for 5 tabs */
   border: none;
   background: var(--color-surface);
@@ -245,17 +251,24 @@ body {
 /* Main content area */
 .main-content {
   flex: 1;
-  overflow-y: auto;
+  overflow-y: auto; /* Vertical scrolling for main content */
   -webkit-overflow-scrolling: touch;
   padding: var(--spacing-md);
   background-color: var(--color-background);
+  /* The .orders-list inside handles horizontal scrolling */
 }
 
 /* Orders list */
 .orders-list {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   gap: var(--spacing-md);
+  overflow-x: auto; /* THIS is the key for horizontal scrolling */
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: var(--spacing-md); /* Space for scrollbar */
+  /* Ensure this container can scroll horizontally */
+  width: 100%; /* Important to define its width within its parent */
 }
 
 /* Order card optimized for touch */
@@ -266,6 +279,9 @@ body {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   border: 1px solid var(--color-border);
   transition: transform 0.15s ease, box-shadow 0.15s ease;
+  min-width: 320px; /* Adjust as needed for your card content - this makes them horizontal */
+  max-width: 90vw; /* Allows cards to be slightly smaller than viewport if needed */
+  flex: 0 0 auto; /* Crucial: Prevents cards from shrinking/growing, ensuring they maintain min-width and enable horizontal scroll */
 }
 
 .order-card:active {
@@ -306,7 +322,8 @@ body {
   margin-bottom: var(--spacing-xs);
 }
 
-.order-time, .completion-time {
+.order-time,
+.completion-time {
   font-size: var(--font-size-xs);
   color: var(--color-text-secondary);
 }
@@ -336,10 +353,25 @@ body {
   flex-shrink: 0; /* Prevent shrinking if order-info is long */
 }
 
-.status-new { background: var(--status-new-bg); color: var(--status-new-text); }
-.status-preparing { background: var(--status-preparing-bg); color: var(--status-preparing-text); }
-.status-ready { background: var(--status-ready-bg); color: var(--status-ready-text); }
-.status-completed { background: var(--status-completed-bg); color: var(--status-completed-text); }
+.status-new {
+  background: var(--status-new-bg);
+  color: var(--status-new-text);
+}
+
+.status-preparing {
+  background: var(--status-preparing-bg);
+  color: var(--status-preparing-text);
+}
+
+.status-ready {
+  background: var(--status-ready-bg);
+  color: var(--status-ready-text);
+}
+
+.status-completed {
+  background: var(--status-completed-bg);
+  color: var(--status-completed-text);
+}
 
 
 /* Line items section */
@@ -356,6 +388,7 @@ body {
   border-bottom: 1px solid var(--color-border-light);
   font-size: var(--font-size-sm);
 }
+
 .line-item:last-child {
   border-bottom: none;
 }
@@ -368,6 +401,7 @@ body {
   margin-bottom: var(--spacing-md);
   background: #fafafa; /* Slightly off-white to differentiate */
 }
+
 .line-item-detailed:last-child {
   margin-bottom: 0;
 }
@@ -460,6 +494,7 @@ body {
   font-size: var(--font-size-xs);
   color: #713f12; /* Darker for better contrast - consider variable */
 }
+
 .modifier-item:last-child {
   margin-bottom: 0;
 }
@@ -535,18 +570,40 @@ body {
   letter-spacing: 0.5px;
   margin-top: var(--spacing-sm); /* Add margin between buttons if stacked */
 }
+
 .action-button:first-child {
-    margin-top: 0;
+  margin-top: 0;
 }
 
-.btn-start { background: var(--color-secondary); color: var(--color-text-light); }
-.btn-start:active { background: var(--color-secondary-active); transform: scale(0.98); }
+.btn-start {
+  background: var(--color-secondary);
+  color: var(--color-text-light);
+}
 
-.btn-ready { background: var(--color-success); color: var(--color-text-light); }
-.btn-ready:active { background: var(--color-success-active); transform: scale(0.98); }
+.btn-start:active {
+  background: var(--color-secondary-active);
+  transform: scale(0.98);
+}
 
-.btn-done { background: var(--color-neutral); color: var(--color-text-light); }
-.btn-done:active { background: var(--color-neutral-active); transform: scale(0.98); }
+.btn-ready {
+  background: var(--color-success);
+  color: var(--color-text-light);
+}
+
+.btn-ready:active {
+  background: var(--color-success-active);
+  transform: scale(0.98);
+}
+
+.btn-done {
+  background: var(--color-neutral);
+  color: var(--color-text-light);
+}
+
+.btn-done:active {
+  background: var(--color-neutral-active);
+  transform: scale(0.98);
+}
 
 /* Empty state */
 .empty-state {
@@ -586,17 +643,21 @@ body {
 }
 
 /* Responsive adjustments for very small screens (e.g., ~320px width and below) */
-@media (max-width: 360px) { /* Target slightly wider than 320px for these common small screen adjustments */
-  :root { /* Adjust base font slightly if necessary, or other variables */
+@media (max-width: 360px) {
+  /* Target slightly wider than 320px for these common small screen adjustments */
+  :root {
+    /* Adjust base font slightly if necessary, or other variables */
     /* --font-size-base: 0.9375rem; 15px if 16px feels too large */
   }
 
   .header {
     padding: var(--spacing-sm) var(--spacing-md);
   }
+
   .app-title {
     font-size: var(--font-size-md); /* Slightly smaller title */
   }
+
   .stats {
     gap: var(--spacing-md); /* Reduce gap in stats */
   }
@@ -607,9 +668,11 @@ body {
     min-height: var(--touch-target-min-height); /* Reduce min-height slightly if needed */
   }
 
-  .order-card, .line-item-detailed {
+  .order-card,
+  .line-item-detailed {
     padding: var(--spacing-md);
   }
+
   .main-content {
     padding: var(--spacing-sm);
   }
@@ -619,14 +682,17 @@ body {
     align-items: flex-start;
     gap: var(--spacing-xs);
   }
+
   .item-main-info {
     width: 100%; /* Ensure it takes full width in column layout */
   }
+
   .item-price {
     align-self: flex-end; /* Price to the right */
   }
 
-  .modifier-item { /* If modifiers look cramped */
+  .modifier-item {
+    /* If modifiers look cramped */
     /* flex-direction: column; */
     /* align-items: flex-start; */
     /* gap: var(--spacing-xxs); */
@@ -643,14 +709,17 @@ body {
   .tabs {
     flex-wrap: wrap; /* Allow tabs to wrap */
   }
+
   .tab-button {
     flex-basis: 50%; /* Two tabs per row */
     flex-grow: 0;
     font-size: var(--font-size-xs); /* Ensure text fits */
     min-height: calc(var(--touch-target-min-height) * 0.9); /* Can be slightly smaller if wrapping */
   }
-  .tab-button:nth-child(odd):nth-last-child(1) { /* If there's an odd one out (e.g., 5th tab) */
-     flex-basis: 100%; /* Make the last tab full width if it's alone on a row */
+
+  .tab-button:nth-child(odd):nth-last-child(1) {
+    /* If there's an odd one out (e.g., 5th tab) */
+    flex-basis: 100%; /* Make the last tab full width if it's alone on a row */
   }
 }
 
@@ -660,9 +729,11 @@ body {
   .header {
     padding: var(--spacing-sm) var(--spacing-md);
   }
+
   .header-bottom {
     display: none; /* Hide stats in landscape to save precious vertical space */
   }
+
   .app-title {
     font-size: var(--font-size-md);
   }
@@ -673,10 +744,12 @@ body {
     font-size: var(--font-size-xs);
   }
 
-  .order-card, .line-item-detailed {
+  .order-card,
+  .line-item-detailed {
     padding: var(--spacing-sm);
     margin-bottom: var(--spacing-sm);
   }
+
   .main-content {
     padding: var(--spacing-sm);
   }
@@ -692,9 +765,28 @@ body {
     min-height: calc(var(--touch-target-min-height) * 0.9);
     font-size: var(--font-size-sm);
   }
+
   .order-total {
     margin-top: var(--spacing-sm);
     padding-top: var(--spacing-sm);
     font-size: var(--font-size-sm); /* Slightly smaller total */
   }
+}
+
+.main-content {
+  flex: 1;
+  overflow-y: auto; /* This is key for enabling scrolling */
+  -webkit-overflow-scrolling: touch; /* Helps with momentum on touch devices, might have some effect on Pi */
+  padding: var(--spacing-md);
+  background-color: var(--color-background);
+  /* Add a class for drag scrolling if needed, e.g., .drag-scroll */
+}
+
+/* Optional: if you want to hide scrollbars (Chromium on Pi might show them) */
+.main-content::-webkit-scrollbar {
+  display: none; /* For Webkit browsers */
+}
+.main-content {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
 }
