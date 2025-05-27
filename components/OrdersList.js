@@ -1,6 +1,7 @@
 // components/OrdersList.js
 import React from "react";
 import OrderCard from "./OrderCard";
+import ScrollContainer from 'react-indiana-drag-scroll'; // Import the package
 
 const OrdersList = ({
   orders,
@@ -26,7 +27,6 @@ const OrdersList = ({
     );
   }
 
-
   if (!orders || orders.length === 0) {
     // This case should ideally be covered by emptyStateMessage
     // but acts as a fallback.
@@ -38,9 +38,17 @@ const OrdersList = ({
     );
   }
 
-
   return (
-    <div className="orders-list">
+    // Wrap the list of cards with ScrollContainer
+    // The existing 'orders-list' class provides display:flex, gap, etc.
+    // react-indiana-drag-scroll handles the overflow and drag interaction.
+    <ScrollContainer
+      vertical={false}      // Disable vertical scrolling by drag
+      horizontal={true}     // Enable horizontal scrolling by drag
+      className="orders-list" // Apply existing styling for flex layout and gap
+      hideScrollbars={true} // This is a prop from react-indiana-drag-scroll, defaults to true
+      // You can also pass 'style' prop if needed for more specific container styling
+    >
       {orders.map((order) => (
         <OrderCard
           key={order.id}
@@ -49,7 +57,7 @@ const OrdersList = ({
           showCompleted={showCompleted}
         />
       ))}
-    </div>
+    </ScrollContainer>
   );
 };
 

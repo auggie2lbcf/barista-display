@@ -1,5 +1,5 @@
 // pages/index.js
-import React, { useState, useEffect, useCallback, useRef, useMemo } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react"; // Removed useRef
 import Head from "next/head";
 import HeaderDisplay from "../components/HeaderDisplay";
 import OrderTabs from "../components/OrderTabs";
@@ -26,26 +26,20 @@ export default function HomePage() {
   const [error, setError] = useState(null);
   const [connectionStatus, setConnectionStatus] = useState(CONNECTION_STATUS.CONNECTING);
 
-  const scrollableContainerRef = useRef(null);
-  const isDraggingRef = useRef(false); // To track dragging state across different event types
-  const dragStartCoordsRef = useRef({ x: 0, y: 0 });
-  const scrollStartCoordsRef = useRef({ left: 0, top: 0 });
+  // Removed: scrollableContainerRef, isDraggingRef, dragStartCoordsRef, scrollStartCoordsRef
 
-
-  // Memoized statistics based on orders
   const stats = useMemo(() => {
     const inprogressCount = orders.filter(order => order.status === ORDER_STATUS.IN_PROGRESS).length;
     const completedCount = orders.filter(order => order.status === ORDER_STATUS.COMPLETED).length;
     return {
-      total: inprogressCount, // Or total open orders
+      total: inprogressCount,
       inprogress: inprogressCount,
       completed: completedCount,
     };
   }, [orders]);
 
-  // Function to fetch and process orders
   const loadOrders = useCallback(async (isManualRefresh = false) => {
-    if (!isManualRefresh) setIsLoading(true); // Only show full load on initial/auto refresh
+    if (!isManualRefresh) setIsLoading(true);
     setError(null);
     setConnectionStatus(CONNECTION_STATUS.CONNECTING);
 
@@ -58,13 +52,12 @@ export default function HomePage() {
       console.error("Error fetching orders:", err);
       setError(`Failed to fetch orders: ${err.message}`);
       setConnectionStatus(CONNECTION_STATUS.ERROR);
-      setOrders([]); // Clear orders on error to avoid showing stale data
+      setOrders([]);
     } finally {
       setIsLoading(false);
     }
   }, []);
 
-  // Initial load and interval-based refresh
   useEffect(() => {
     loadOrders();
     const intervalId = setInterval(
@@ -74,7 +67,8 @@ export default function HomePage() {
     return () => clearInterval(intervalId);
   }, [loadOrders]);
 
-  // Filter orders based on the active tab
+  // Removed: useEffect for handling drag-to-scroll (mouse and touch)
+
   const filteredOrders = useMemo(() => {
     let newFilteredList = [];
     if (activeTab === TAB_OPTIONS.IN_PROGRESS) {
@@ -83,7 +77,6 @@ export default function HomePage() {
       newFilteredList = orders.filter((order) => order.status === ORDER_STATUS.COMPLETED);
     }
 
-    // Sort orders: completed by completedAt (desc), in-progress by timestamp (asc)
     if (activeTab === TAB_OPTIONS.COMPLETED) {
       return newFilteredList.sort((a, b) =>
         new Date(b.completedAt || b.timestamp) - new Date(a.completedAt || a.timestamp)
@@ -92,7 +85,6 @@ export default function HomePage() {
     return newFilteredList.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
   }, [orders, activeTab]);
 
-  // Handle order status updates (e.g., marking as completed)
   const handleStatusUpdate = async (orderId, newStatus) => {
     if (newStatus !== ORDER_STATUS.COMPLETED) {
       setError("Invalid status update. Only 'completed' is allowed for now.");
@@ -107,11 +99,10 @@ export default function HomePage() {
 
     if (typeof orderToUpdate.version === 'undefined') {
       setError("Error: Order version is missing. Please refresh.");
-      await loadOrders(true); // Force refresh
+      await loadOrders(true);
       return;
     }
 
-    // Optimistic UI update
     const originalOrders = [...orders];
     setOrders(prevOrders =>
       prevOrders.map(order =>
@@ -123,26 +114,21 @@ export default function HomePage() {
 
     try {
       await updateSquareOrder(orderId, orderToUpdate.version, orderToUpdate.fulfillmentId);
-      // Successfully updated, fetch latest to confirm and get new versions
       await loadOrders(true);
     } catch (err) {
       console.error("Error updating Square order:", err);
-      // Revert optimistic update
       setOrders(originalOrders);
       if (err.message.includes("VERSION_MISMATCH")) {
         setError("Order was updated elsewhere. Refreshing orders. Please try again.");
       } else {
         setError(`Failed to update order: ${err.message}. Please try refreshing.`);
       }
-      await loadOrders(true); // Refresh to get the correct state
+      await loadOrders(true);
     }
   };
-
- 
   
-
   const getEmptyStateMessage = () => {
-    if (isLoading && orders.length === 0) return null; // Loading message handled by OrdersList
+    if (isLoading && orders.length === 0) return null;
     if (filteredOrders.length === 0) {
       return activeTab === TAB_OPTIONS.COMPLETED
         ? "No completed orders found."
@@ -164,7 +150,7 @@ export default function HomePage() {
         <HeaderDisplay
           connectionStatus={connectionStatus}
           stats={stats}
-          onRefresh={() => loadOrders(true)} // Manual refresh
+          onRefresh={() => loadOrders(true)}
           isLoading={isLoading}
         />
         <OrderTabs
@@ -173,12 +159,13 @@ export default function HomePage() {
           stats={stats}
           tabOptions={TAB_OPTIONS}
         />
-        <main className="main-content" ref={scrollableContainerRef}>
+        {/* The main element no longer needs a ref for scrolling here */}
+        <main className="main-content">
           {error && <div className="error-message global-error-message">{error}</div>}
           <OrdersList
             orders={filteredOrders}
             onStatusUpdate={handleStatusUpdate}
-            isLoading={isLoading && orders.length === 0} // Show loading only if no orders yet
+            isLoading={isLoading && orders.length === 0}
             emptyStateMessage={getEmptyStateMessage()}
             showCompleted={activeTab === TAB_OPTIONS.COMPLETED}
           />
