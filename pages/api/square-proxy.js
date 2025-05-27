@@ -1,102 +1,120 @@
-const fetch = require("node-fetch");
+// pages/api/square-proxy.js
+import { SQUARE_API_CONSTANTS, HTTP_METHODS } from "../../lib/config";
 
-const SQUARE_API_VERSION = "2023-10-18";
+const { API_VERSION, BASE_URL_SANDBOX, BASE_URL_PRODUCTION } = SQUARE_API_CONSTANTS;
 
-export default async function handler(req, res) {
-  if (req.method !== "POST") { // This is the method from client (index.js) to this proxy
-    return res.status(405).json({ error: "Method not allowed for proxy" });
+export default async function squareProxyHandler(req, res) {
+  if (req.method !== HTTP_METHODS.POST) {
+    console.warn(`Proxy: Method ${req.method} not allowed. Only POST is accepted from client.`);
+    return res.status(405).json({ error: "Method Not Allowed: Proxy accepts only POST." });
   }
 
+  const {
+    environment, // "sandbox" or "production"
+    square_api_path: squareApiPath, // e.g., "/v2/orders/search"
+    body: requestBodyToSquare, // Body for the Square API
+    actual_method_for_square: actualMethodForSquare, // Intended HTTP method for Square (POST, PUT, GET etc.)
+  } = req.body;
+
+  // Validate essential parameters
+  if (!environment || !squareApiPath || !actualMethodForSquare) {
+    return res.status(400).json({
+      error: "Bad Request: Missing one or more required fields: environment, square_api_path, actual_method_for_square.",
+    });
+  }
+
+  if (![HTTP_METHODS.POST, HTTP_METHODS.PUT, HTTP_METHODS.GET].includes(actualMethodForSquare.toUpperCase())) {
+     // Add other methods if Square API uses them, e.g. DELETE
+    return res.status(400).json({ error: `Bad Request: Invalid actual_method_for_square: ${actualMethodForSquare}.`});
+  }
+
+  const accessToken = process.env.SQUARE_ACCESS_TOKEN;
+  if (!accessToken) {
+    console.error("Proxy Error: SQUARE_ACCESS_TOKEN environment variable is missing.");
+    return res.status(500).json({ error: "Server Configuration Error: Missing access token." });
+  }
+
+  if (!["sandbox", "production"].includes(environment)) {
+    return res.status(400).json({ error: "Bad Request: Invalid environment. Must be 'sandbox' or 'production'." });
+  }
+
+  const squareBaseUrl = environment === "production" ? BASE_URL_PRODUCTION : BASE_URL_SANDBOX;
+  const fullSquareUrl = `${squareBaseUrl}${squareApiPath}`;
+  const methodForSquareRequest = actualMethodForSquare.toUpperCase();
+
+  console.log(`Proxying [${methodForSquareRequest}] request to: ${fullSquareUrl}`);
+  if (requestBodyToSquare && Object.keys(requestBodyToSquare).length > 0) {
+    // Only log body if it's not empty and not a GET request (though GET can have body, it's unusual)
+    if (methodForSquareRequest !== HTTP_METHODS.GET) {
+        console.log("Request body to Square API:", JSON.stringify(requestBodyToSquare, null, 2));
+    }
+  }
+
+
   try {
-    const accessToken = process.env.SQUARE_ACCESS_TOKEN;
-    if (!accessToken) {
-      console.error("SQUARE_ACCESS_TOKEN environment variable is missing");
-      return res.status(500).json({
-        error: "Server configuration error: Missing access token",
-      });
-    }
-
-    // actual_method_for_square is the intended HTTP method for the Square API
-    const { environment, square_api_path, body, actual_method_for_square } = req.body;
-
-    if (!environment || !square_api_path) {
-      return res.status(400).json({
-        error: "Missing required fields: environment and square_api_path",
-      });
-    }
-
-    if (!["sandbox", "production"].includes(environment)) {
-      return res.status(400).json({
-        error: "Invalid environment. Must be 'sandbox' or 'production'",
-      });
-    }
-
-    const squareBaseUrl =
-      environment === "production"
-        ? "https://connect.squareup.com"
-        : "https://connect.squareupsandbox.com";
-
-    const fullUrl = `${squareBaseUrl}${square_api_path}`;
-
-    // Determine the HTTP method for the Square API call
-    let methodToSquare = "POST"; // Default
-
-    if (actual_method_for_square) {
-      methodToSquare = actual_method_for_square.toUpperCase();
-    } else {
-      // Fallback logic if actual_method_for_square is not provided by the client
-      // This can be made more robust based on specific paths
-      if (square_api_path.includes("/fulfillments/") && !square_api_path.endsWith("/update")) {
-        // This specific condition might be for an old/incorrect fulfillment update attempt
-        methodToSquare = "PUT";
-      } else if (square_api_path.match(/^\/v2\/orders\/[^/]+$/) && !square_api_path.includes("search") && !square_api_path.includes("batch-retrieve")) {
-        // Matches /v2/orders/{order_id} for UpdateOrder, which should be PUT
-        methodToSquare = "PUT";
-      }
-      // Add other specific rules here if needed, e.g. for POST to /v2/orders/{order_id}/pay
-    }
-
-    console.log(`Proxying request to: ${fullUrl}`);
-    console.log(`Request method to Square API: ${methodToSquare}`); // Log the actual method being used
-    console.log("Request body to Square API:", JSON.stringify(body, null, 2));
-
-    const squareResponse = await fetch(fullUrl, {
-      method: methodToSquare,
+    const squareResponse = await fetch(fullSquareUrl, {
+      method: methodForSquareRequest,
       headers: {
-        Authorization: `Bearer ${accessToken}`,
-        "Square-Version": SQUARE_API_VERSION,
+        "Authorization": `Bearer ${accessToken}`,
+        "Square-Version": API_VERSION,
         "Content-Type": "application/json",
-        Accept: "application/json",
+        "Accept": "application/json",
       },
-      body: JSON.stringify(body || {}), // Ensure body is at least an empty object if not provided
+      // Conditionally add body for methods that support it
+      body: (methodForSquareRequest !== HTTP_METHODS.GET && requestBodyToSquare)
+            ? JSON.stringify(requestBodyToSquare)
+            : undefined,
     });
 
-    const responseData = await squareResponse.json().catch(err => {
-      // Handle cases where Square might not return JSON (e.g., some 5xx errors or network issues)
-      console.error("Failed to parse Square API JSON response:", err);
-      // Return a structured error if parsing fails but status indicates an error
-      if (!squareResponse.ok) {
-        return { 
-            errors: [{ 
-                category: "API_ERROR", 
-                code: "PARSE_ERROR", 
-                detail: `Failed to parse JSON response from Square. Status: ${squareResponse.status} ${squareResponse.statusText}` 
+    let responseDataFromSquare;
+    const contentType = squareResponse.headers.get("content-type");
+
+    if (contentType && contentType.includes("application/json")) {
+      responseDataFromSquare = await squareResponse.json().catch(err => {
+        console.error("Proxy Error: Failed to parse Square API JSON response.", err);
+        // If parsing fails but status indicates an error, create a structured error
+        if (!squareResponse.ok) {
+          return {
+            errors: [{
+              category: "API_ERROR",
+              code: "JSON_PARSE_ERROR",
+              detail: `Failed to parse JSON response from Square. Status: ${squareResponse.status} ${squareResponse.statusText}`
             }]
-        };
-      }
-      return {}; // Or throw, depending on how you want to handle non-JSON success (unlikely for Square)
-    });
-    
-    console.log(`Square API response status: ${squareResponse.status}`);
-    console.log("Square API response data:", JSON.stringify(responseData, null, 2));
+          };
+        }
+        return {}; // Or throw, if successful non-JSON responses are not expected
+      });
+    } else {
+        // Handle non-JSON responses (e.g. plain text errors or empty successful responses)
+        const textResponse = await squareResponse.text();
+        console.log(`Square API non-JSON response (Status ${squareResponse.status}):`, textResponse);
+        if (!squareResponse.ok) {
+             responseDataFromSquare = {
+                errors: [{
+                    category: "API_ERROR",
+                    code: squareResponse.statusText.replace(/\s+/g, '_').toUpperCase() || "UNKNOWN_ERROR",
+                    detail: textResponse || `Square API Error: ${squareResponse.status}`
+                }]
+            };
+        } else {
+            responseDataFromSquare = { message: "Operation successful, no JSON content."}; // For 204 No Content etc.
+        }
+    }
 
-    res.status(squareResponse.status).json(responseData);
+    console.log(`Square API response status: ${squareResponse.status}`);
+    if (Object.keys(responseDataFromSquare).length > 0) {
+        // console.log("Square API response data:", JSON.stringify(responseDataFromSquare, null, 2));
+    }
+
+
+    return res.status(squareResponse.status).json(responseDataFromSquare);
+
   } catch (error) {
-    console.error("Error in square-proxy:", error);
-    res.status(500).json({
-      error: "Internal server error in proxy",
+    console.error("Proxy Error: Unhandled exception in square-proxy.", error);
+    return res.status(500).json({
+      error: "Internal Server Error: Proxy failed.",
       message: error.message,
-      stack: process.env.NODE_ENV === "development" ? error.stack : undefined,
+      // stack: process.env.NODE_ENV === "development" ? error.stack : undefined, // Be cautious exposing stack
     });
   }
 }

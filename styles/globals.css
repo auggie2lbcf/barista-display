@@ -3,125 +3,147 @@
 /* :root variables for easy theming and consistency */
 :root {
   /* Colors */
-  --color-primary: #6b4423;
+  --color-primary: #6b4423; /* Main brand color */
   --color-primary-light: #8b5a3c;
-  --color-primary-active: #5a371d; /* Darker shade for active tab */
-  --color-secondary: #3b82f6; /* Example: btn-start */
+  --color-primary-active: #5a371d; /* Darker shade for active elements */
+  --color-secondary: #3b82f6; /* Accent color (e.g., quantity badge) */
   --color-secondary-active: #2563eb;
-  --color-success: #10b981; /* Example: btn-ready */
+  --color-success: #10b981; /* Success actions (e.g., "Ready" button if implemented) */
   --color-success-active: #059669;
-  --color-neutral: #6b7280; /* Example: btn-done, text */
+  --color-neutral: #6b7280; /* Neutral actions (e.g., "Done" button) */
   --color-neutral-active: #4b5563;
   --color-white: #ffffff;
-  --color-text-primary: #333333;
-  --color-text-secondary: #6b7280;
-  --color-text-dark: #111827;
-  --color-text-light: var(--color-white);
-  --color-background: #f8f9fa;
-  --color-surface: var(--color-white); /* For cards, tabs */
-  --color-border: #e5e7eb;
-  --color-border-light: #f3f4f6;
-  --color-error: #dc2626;
+  --color-black: #000000;
+
+  /* Text Colors */
+  --color-text-primary: #333333; /* Main text */
+  --color-text-secondary: #6b7280; /* Subdued text */
+  --color-text-dark: #111827; /* For titles or important info */
+  --color-text-light: var(--color-white); /* Text on dark backgrounds */
+  --color-text-error: #dc2626;
+  --color-text-link: var(--color-primary);
+
+  /* Backgrounds */
+  --color-background: #f8f9fa; /* Main app background */
+  --color-surface: var(--color-white); /* Card, modal backgrounds */
+  --color-surface-alt: #fafafa; /* Alternate surface, e.g., for detailed line items */
+  --color-surface-hover: #f3f4f6; /* Hover state for interactive surfaces */
+  --color-surface-active-tab: #fef7ed; /* Background for active tab */
+
+  /* Borders */
+  --color-border: #e5e7eb; /* Standard border */
+  --color-border-light: #f3f4f6; /* Lighter border for subtle divisions */
+  --color-border-focus: var(--color-primary);
+
+  /* Error State Colors */
+  --color-error: var(--color-text-error);
   --color-error-bg: #fef2f2;
   --color-error-border: #fecaca;
 
-  /* Status Colors */
+  /* Status Specific Colors */
   --status-new-bg: #fef3c7;
   --status-new-text: #92400e;
-  --status-preparing-bg: #dbeafe;
+  --status-preparing-bg: #dbeafe; /* Example for a 'preparing' state if added */
   --status-preparing-text: #1e40af;
-  --status-ready-bg: #d1fae5;
+  --status-ready-bg: #d1fae5;   /* Example for a 'ready' state if added */
   --status-ready-text: #065f46;
+  --status-inprogress-bg: var(--status-new-bg); /* Using 'new' for 'inprogress' for now */
+  --status-inprogress-text: var(--status-new-text);
   --status-completed-bg: #e5e7eb;
   --status-completed-text: #374151;
-  --status-dot-online: #4ade80;
-  --status-dot-offline: #ef4444;
+  --status-unknown-bg: #f3f4f6;
+  --status-unknown-text: #4b5563;
+  --status-dot-online: #4ade80; /* Green */
+  --status-dot-offline: #ef4444; /* Red */
+  --status-dot-connecting: #f59e0b; /* Amber */
 
-  /* Font Sizes */
-  --font-size-xs: 0.75rem; /* 12px */
+
+  /* Font Sizes - adjust based on 5-inch screen readability */
+  --font-size-xxs: 0.625rem; /* 10px */
+  --font-size-xs: 0.75rem;  /* 12px */
   --font-size-sm: 0.875rem; /* 14px */
-  --font-size-base: 1rem; /* 16px */
+  --font-size-base: 1rem;    /* 16px (consider making this smaller, e.g., 14px or 15px, if 16px feels too large) */
   --font-size-md: 1.125rem; /* 18px */
-  --font-size-lg: 1.25rem; /* 20px */
+  --font-size-lg: 1.25rem;  /* 20px */
+  --font-size-xl: 1.5rem;   /* 24px */
 
-  /* Spacing */
+  /* Spacing - consistent spacing units */
   --spacing-xxs: 0.125rem; /* 2px */
-  --spacing-xs: 0.25rem; /* 4px */
-  --spacing-sm: 0.5rem; /* 8px */
-  --spacing-md: 0.75rem; /* 12px */
-  --spacing-lg: 1rem; /* 16px */
-  --spacing-xl: 1.5rem; /* 24px */
+  --spacing-xs: 0.25rem;  /* 4px */
+  --spacing-sm: 0.5rem;   /* 8px */
+  --spacing-md: 0.75rem;  /* 12px */
+  --spacing-lg: 1rem;     /* 16px */
+  --spacing-xl: 1.5rem;   /* 24px */
+  --spacing-xxl: 2rem;    /* 32px */
 
-  /* Borders */
+  /* Borders & Shadows */
   --border-radius-sm: 4px;
   --border-radius-md: 8px;
   --border-radius-lg: 12px;
-  --border-radius-pill: 20px;
+  --border-radius-pill: 9999px; /* For pill-shaped elements */
+  --box-shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --box-shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --box-shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
 
-  /* Touch Targets */
-  --touch-target-min-height: 44px; /* ~3rem */
+  /* Touch Targets - ensuring buttons/tabs are easy to press */
+  --touch-target-min-height: 44px;
   --touch-target-min-height-lg: 50px;
-  --touch-target-min-width: 44px; /* ~3rem */
+  --touch-target-min-width: 44px;
 }
 
-/* Reset and base styles for 5-inch touchscreen */
+/* Global Reset and Base Styles */
 *,
 *::before,
 *::after {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  -webkit-font-smoothing: antialiased; /* Smoother fonts on WebKit */
+  -moz-osx-font-smoothing: grayscale; /* Smoother fonts on Firefox */
 }
 
 html {
-  font-size: 16px; /* Base font size for rem calculations */
+  font-size: var(--font-size-base); /* Base font size for rem calculations */
   height: 100%;
   -webkit-text-size-adjust: 100%; /* Prevent font scaling in landscape */
+  line-height: 1.5; /* Default line height */
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto",
-    "Oxygen", "Ubuntu", "Cantarell", sans-serif;
-  line-height: 1.5; /* Slightly increased for better readability */
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+    Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
   color: var(--color-text-primary);
   background-color: var(--color-background);
   height: 100%;
   width: 100%;
-  overflow-x: hidden; /* Prevent horizontal scroll on the body itself */
+  overflow: hidden; /* Prevent body scroll, individual sections will scroll */
 
-  /* Optimize for touch */
-  -webkit-touch-callout: none;
-  -webkit-user-select: none;
-  -khtml-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-  -webkit-tap-highlight-color: transparent; /* Remove tap highlight */
-  -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+  /* Touch optimizations */
 }
 
-#__next { /* Assuming Next.js or similar framework */
+#__next {
   height: 100%;
-  display: flex; /* Helps with full height content */
-  flex-direction: column;
-}
-
-/* Container for 5-inch screen */
-.container {
-  width: 100vw;
-  height: 100vh; /* Use vh for viewport height */
   display: flex;
   flex-direction: column;
-  overflow: hidden; /* Main scrolling handled by .main-content (vertical) and .orders-list (horizontal) */
 }
 
-/* Header optimized for small screen */
+/* Main application container */
+.container {
+  width: 100vw;
+  height: 100vh; /* Full viewport height */
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; /* Crucial: No scroll on container, handled by children */
+}
+
+/* Header */
 .header {
   background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
   color: var(--color-text-light);
   padding: var(--spacing-md);
-  flex-shrink: 0;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  flex-shrink: 0; /* Header should not shrink */
+  box-shadow: var(--box-shadow-md);
+  z-index: 10; /* Keep header above content */
 }
 
 .header-top {
@@ -140,20 +162,19 @@ body {
 .connection-status {
   display: flex;
   align-items: center;
-  gap: var(--spacing-xs); /* Reduced from 0.375rem */
-  font-size: var(--font-size-sm); /* Increased from 0.75rem */
+  gap: var(--spacing-xs);
+  font-size: var(--font-size-sm);
 }
 
 .status-dot {
-  width: 10px; /* Increased from 8px */
-  height: 10px; /* Increased from 8px */
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
-  background-color: var(--status-dot-online);
 }
+.status-dot.online { background-color: var(--status-dot-online); }
+.status-dot.offline { background-color: var(--status-dot-offline); }
+.status-dot.connecting { background-color: var(--status-dot-connecting); }
 
-.status-dot.error {
-  background-color: var(--status-dot-offline);
-}
 
 .header-bottom {
   display: flex;
@@ -164,7 +185,7 @@ body {
 .stats {
   display: flex;
   gap: var(--spacing-lg);
-  font-size: var(--font-size-sm); /* Increased from 0.75rem */
+  font-size: var(--font-size-sm);
 }
 
 .stat-item {
@@ -175,10 +196,8 @@ body {
 
 .stat-count {
   font-weight: 700;
-  font-size: var(--font-size-sm); /* Kept as 0.875rem */
 }
 
-/* Touch-friendly refresh button */
 .refresh-btn {
   background: rgba(255, 255, 255, 0.2);
   border: 1px solid rgba(255, 255, 255, 0.3);
@@ -188,7 +207,7 @@ body {
   font-size: var(--font-size-sm);
   font-weight: 600;
   min-height: var(--touch-target-min-height);
-  min-width: var(--touch-target-min-height);
+  min-width: var(--touch-target-min-width); /* Ensure it's a good square-ish target */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -204,115 +223,139 @@ body {
 .refresh-btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+  transform: none;
 }
 
-/* Tab navigation for small screen (supports 5 tabs) */
+/* Tabs */
 .tabs {
   display: flex;
   background: var(--color-surface);
   border-bottom: 1px solid var(--color-border);
   flex-shrink: 0;
-  /* Add these for horizontal scrolling if tabs exceed screen width */
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
+  overflow-x: auto; /* Allow horizontal scroll if tabs overflow */
+  -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
   white-space: nowrap; /* Keep tabs in a single line */
 }
 
 .tab-button {
-  /* Removed flex: 1; to allow natural width and horizontal scrolling */
-  flex-shrink: 0; /* Prevent tabs from shrinking below their content size */
-  padding: var(--spacing-md) var(--spacing-xs); /* Adjusted for 5 tabs */
+  padding: var(--spacing-md) var(--spacing-lg); /* Generous padding for touch */
   border: none;
-  background: var(--color-surface);
+  background: transparent; /* Use transparent background for non-active */
   color: var(--color-text-secondary);
-  font-size: var(--font-size-sm); /* Adjusted from 0.8rem for better readability */
+  font-size: var(--font-size-sm);
   font-weight: 600;
   min-height: var(--touch-target-min-height-lg);
   cursor: pointer;
   transition: color 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
   border-bottom: 3px solid transparent;
-  text-align: center; /* Ensure text is centered */
-  white-space: nowrap; /* Prevent text wrapping if possible */
-  overflow: hidden; /* Hide overflow if text is too long */
-  text-overflow: ellipsis; /* Add ellipsis for long text */
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 0; /* Prevent shrinking if many tabs */
 }
 
 .tab-button.active {
   color: var(--color-primary);
   border-bottom-color: var(--color-primary);
-  background: #fef7ed; /* Consider using a variable or slightly desaturated primary */
+  background-color: var(--color-surface-active-tab);
+}
+
+.tab-button:not(.active):hover {
+  background-color: var(--color-surface-hover);
+  color: var(--color-text-primary);
 }
 
 .tab-button:not(.active):active {
-  background: #f3f4f6; /* Consider var(--color-background-hover) */
+  background-color: var(--color-border-light); /* Slightly darker for active press */
+}
+
+.tab-count {
+  margin-left: var(--spacing-xs);
+  font-size: var(--font-size-xs);
+  font-weight: normal;
+  color: var(--color-text-secondary);
+}
+.tab-button.active .tab-count {
+  color: var(--color-primary); /* Match active tab color */
 }
 
 
-/* Main content area */
+/* Main Content Area - handles vertical scrolling */
 .main-content {
-  flex: 1;
-  overflow-y: auto; /* Vertical scrolling for main content */
+  flex: 1; /* Take remaining vertical space */
+  overflow-y: auto; /* Vertical scrolling */
+  overflow-x: hidden; /* Horizontal scrolling handled by .orders-list */
   -webkit-overflow-scrolling: touch;
   padding: var(--spacing-md);
   background-color: var(--color-background);
-  /* The .orders-list inside handles horizontal scrolling */
 }
 
-/* Orders list */
+/* Hide scrollbars for a cleaner look on touch devices */
+.main-content::-webkit-scrollbar,
+.orders-list::-webkit-scrollbar {
+  display: none; /* For WebKit browsers */
+}
+.main-content,
+.orders-list {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;     /* Firefox */
+}
+
+/* Orders List - handles horizontal scrolling of cards */
 .orders-list {
   display: flex;
-  flex-direction: row;
+  flex-direction: row; /* Cards are laid out horizontally */
   gap: var(--spacing-md);
-  overflow-x: auto; /* THIS is the key for horizontal scrolling */
-  overflow-y: hidden;
+  overflow-x: auto; /* Horizontal scrolling for the cards */
+  overflow-y: hidden; /* No vertical scroll here */
   -webkit-overflow-scrolling: touch;
-  padding-bottom: var(--spacing-md); /* Space for scrollbar */
-  /* Ensure this container can scroll horizontally */
-  width: 100%; /* Important to define its width within its parent */
+  padding-bottom: var(--spacing-md); /* Space for potential scrollbar (even if hidden) */
+  width: 100%; /* Ensure it uses available width within main-content */
+  min-height: 150px; /* Ensure it has some height even when empty for better UX */
 }
 
-/* Order card optimized for touch */
+/* Order Card */
 .order-card {
   background: var(--color-surface);
   border-radius: var(--border-radius-lg);
   padding: var(--spacing-lg);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--box-shadow-md);
   border: 1px solid var(--color-border);
   transition: transform 0.15s ease, box-shadow 0.15s ease;
-  min-width: 320px; /* Adjust as needed for your card content - this makes them horizontal */
-  max-width: 90vw; /* Allows cards to be slightly smaller than viewport if needed */
-  flex: 0 0 auto; /* Crucial: Prevents cards from shrinking/growing, ensuring they maintain min-width and enable horizontal scroll */
+  min-width: 300px; /* Minimum width of a card */
+  max-width: 85vw;  /* Max width, useful on slightly larger "small" screens */
+  flex: 0 0 auto;   /* CRUCIAL for horizontal scrolling: cards don't shrink/grow */
+  display: flex;
+  flex-direction: column; /* Content inside card stacks vertically */
 }
 
-.order-card:active {
+.order-card:active:not(:has(button:active)) { /* Don't scale if a button inside is pressed */
   transform: scale(0.98);
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--box-shadow-sm);
+}
+
+.inprogress-order {
+  /* Specific styles for in-progress cards if needed */
 }
 
 .completed-order {
   opacity: 0.85;
-  background: #f9fafb; /* Slightly different background */
-  border-color: #d1d5db;
+  background: var(--color-surface-hover);
+  border-color: var(--color-border-light);
 }
-
-.completed-order .order-header {
-  /* Optional: could add a subtle bottom border if not using notes separator */
-  /* border-bottom: 1px solid var(--color-border); */
-  /* padding-bottom: var(--spacing-sm); */
-  /* margin-bottom: var(--spacing-sm); */
-}
-
 
 .order-header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start; /* Align items to start for more vertical space */
+  align-items: flex-start;
   margin-bottom: var(--spacing-md);
-  gap: var(--spacing-sm); /* Add gap for better separation if status badge wraps */
+  gap: var(--spacing-sm);
 }
 
 .order-info {
-  flex: 1; /* Allow info to take available space */
+  flex: 1;
+  min-width: 0; /* Prevent overflow issues with long names/ids */
 }
 
 .order-id {
@@ -320,6 +363,7 @@ body {
   font-weight: 700;
   color: var(--color-text-dark);
   margin-bottom: var(--spacing-xs);
+  word-break: break-all; /* Break long IDs if necessary */
 }
 
 .order-time,
@@ -329,7 +373,7 @@ body {
 }
 
 .completion-time {
-  color: var(--color-success);
+  color: var(--color-success); /* Use success color for completion */
   font-weight: 500;
   margin-top: var(--spacing-xs);
 }
@@ -338,10 +382,13 @@ body {
   font-size: var(--font-size-sm);
   font-weight: 600;
   color: var(--color-text-dark);
-  margin-bottom: var(--spacing-xs);
+  margin-top: var(--spacing-xs); /* Add some space above customer name */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-/* Status badges */
+/* Status Badges */
 .status-badge {
   padding: var(--spacing-xs) var(--spacing-md);
   border-radius: var(--border-radius-pill);
@@ -349,62 +396,40 @@ body {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  white-space: nowrap; /* Prevent wrapping */
-  flex-shrink: 0; /* Prevent shrinking if order-info is long */
+  white-space: nowrap;
+  flex-shrink: 0; /* Prevent badge from shrinking */
 }
 
-.status-new {
-  background: var(--status-new-bg);
-  color: var(--status-new-text);
+.status-inprogress {
+  background: var(--status-inprogress-bg);
+  color: var(--status-inprogress-text);
 }
-
-.status-preparing {
-  background: var(--status-preparing-bg);
-  color: var(--status-preparing-text);
-}
-
-.status-ready {
-  background: var(--status-ready-bg);
-  color: var(--status-ready-text);
-}
-
 .status-completed {
   background: var(--status-completed-bg);
   color: var(--status-completed-text);
 }
+.status-unknown {
+  background: var(--status-unknown-bg);
+  color: var(--status-unknown-text);
+}
 
 
-/* Line items section */
+/* Line Items */
 .line-items {
   margin: var(--spacing-md) 0;
+  flex-grow: 1; /* Allow line items to take available space in card */
+  overflow-y: auto; /* Allow vertical scroll within line items if many */
+  max-height: 200px; /* Example max height, adjust as needed */
 }
 
-/* Basic line item (if not using detailed) */
-.line-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: var(--spacing-xs) 0;
-  border-bottom: 1px solid var(--color-border-light);
-  font-size: var(--font-size-sm);
-}
-
-.line-item:last-child {
-  border-bottom: none;
-}
-
-/* Enhanced line item styling for variations and modifiers */
 .line-item-detailed {
   border: 1px solid var(--color-border-light);
   border-radius: var(--border-radius-md);
   padding: var(--spacing-md);
   margin-bottom: var(--spacing-md);
-  background: #fafafa; /* Slightly off-white to differentiate */
+  background: var(--color-surface-alt);
 }
-
-.line-item-detailed:last-child {
-  margin-bottom: 0;
-}
+.line-item-detailed:last-child { margin-bottom: 0; }
 
 .item-header {
   display: flex;
@@ -418,133 +443,99 @@ body {
   display: flex;
   align-items: center;
   gap: var(--spacing-sm);
-  flex-grow: 1; /* Allow it to grow */
-  min-width: 0; /* Prevent overflow issues with flex children */
+  flex-grow: 1;
+  min-width: 0; /* For text truncation */
 }
 
 .item-name {
   font-weight: 700;
   color: var(--color-text-dark);
   font-size: var(--font-size-sm);
-  flex-shrink: 1; /* Allow name to shrink if needed */
+  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .item-quantity {
-  background: var(--color-secondary); /* Using a theme color for better visibility */
+  background: var(--color-secondary);
   color: var(--color-text-light);
   padding: var(--spacing-xxs) var(--spacing-sm);
-  border-radius: var(--border-radius-pill); /* More rounded */
+  border-radius: var(--border-radius-pill);
   font-size: var(--font-size-xs);
   font-weight: 700;
-  min-width: 28px; /* Ensure it's a good touch target if interactive */
+  min-width: 28px;
   text-align: center;
-  flex-shrink: 0; /* Prevent shrinking */
+  flex-shrink: 0;
 }
 
 .item-price {
   font-weight: 600;
   color: var(--color-text-primary);
   font-size: var(--font-size-sm);
-  flex-shrink: 0; /* Prevent shrinking */
-}
-
-/* Variation styling */
-.item-variation {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-sm);
-  margin-bottom: var(--spacing-sm);
-  padding: var(--spacing-xs) var(--spacing-sm);
-  background: #e0f2fe; /* Consider CSS variable */
-  border-radius: var(--border-radius-sm);
-  border-left: 3px solid #0ea5e9; /* Consider CSS variable */
-}
-
-.variation-label {
-  font-size: var(--font-size-xs);
-  font-weight: 600;
-  color: #0369a1; /* Consider CSS variable */
   flex-shrink: 0;
 }
 
-.variation-name {
-  font-size: var(--font-size-xs);
-  color: #0369a1; /* Consider CSS variable */
-  font-weight: 500;
-}
-
-/* Modifiers styling */
-.item-modifiers {
+.item-variation, .item-modifiers, .item-note {
   margin-bottom: var(--spacing-sm);
-  padding-left: var(--spacing-sm); /* Indent modifiers slightly */
+  font-size: var(--font-size-xs);
+}
+.item-variation:last-child, .item-modifiers:last-child, .item-note:last-child {
+    margin-bottom: 0;
 }
 
+
+.variation-label, .note-label {
+  font-weight: 600;
+  margin-right: var(--spacing-xs);
+}
+
+.item-variation {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: #e0f2fe; /* Light blue */
+  border-radius: var(--border-radius-sm);
+  border-left: 3px solid #0ea5e9;
+  color: #0369a1;
+}
+.variation-name { font-weight: 500; }
+
+.item-modifiers { padding-left: var(--spacing-sm); }
 .modifier-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: var(--spacing-xs) 0; /* Simpler padding, rely on parent for bg */
+  padding: var(--spacing-xs) 0;
   margin-bottom: var(--spacing-xs);
-  /* background: #fef3c7; Removed for cleaner look, parent provides context */
-  /* border-radius: var(--border-radius-sm); */
-  /* border-left: 3px solid #f59e0b; */
-  font-size: var(--font-size-xs);
-  color: #713f12; /* Darker for better contrast - consider variable */
+  color: #713f12; /* Dark amber */
 }
+.modifier-item:last-child { margin-bottom: 0; }
+.modifier-name { font-weight: 500; }
+.modifier-price { font-weight: 600; }
 
-.modifier-item:last-child {
-  margin-bottom: 0;
-}
 
-.modifier-name {
-  font-weight: 500;
-}
-
-.modifier-price {
-  font-weight: 600;
-}
-
-/* Item notes styling */
 .item-note {
-  display: flex;
+  display: flex; /* Ensure label and text align well */
   gap: var(--spacing-xs);
   padding: var(--spacing-xs) var(--spacing-sm);
-  background: #f3e8ff; /* Consider CSS variable */
+  background: #f3e8ff; /* Light purple */
   border-radius: var(--border-radius-sm);
-  border-left: 3px solid #8b5cf6; /* Consider CSS variable */
-  margin-top: var(--spacing-sm);
+  border-left: 3px solid #8b5cf6;
+  color: #6b21a8;
+  margin-top: var(--spacing-sm); /* Add margin if other elements are present */
 }
+.note-text { flex: 1; font-style: italic; }
 
-.note-label {
-  font-size: var(--font-size-xs);
-  font-weight: 600;
-  color: #6b21a8; /* Consider CSS variable */
-  flex-shrink: 0;
-}
-
-.note-text {
-  font-size: var(--font-size-xs);
-  color: #6b21a8; /* Consider CSS variable */
-  flex: 1;
-  font-style: italic;
-}
-
-/* Order-level notes */
+/* Order-level Notes */
 .order-notes {
-  background: #fffbeb; /* Softer yellow than error */
+  background: #fffbeb; /* Light yellow */
   border: 1px solid #fde68a;
   color: #b45309;
   padding: var(--spacing-md);
   border-radius: var(--border-radius-md);
   margin: var(--spacing-md) 0;
-  font-size: var(--font-size-sm); /* Slightly larger than item notes */
+  font-size: var(--font-size-sm);
 }
 
-
-/* Order total */
+/* Order Total */
 .order-total {
   text-align: right;
   font-size: var(--font-size-base);
@@ -553,12 +544,13 @@ body {
   margin-top: var(--spacing-md);
   padding-top: var(--spacing-md);
   border-top: 2px solid var(--color-border-light);
+  flex-shrink: 0; /* Prevent total from shrinking */
 }
 
-/* Action buttons - large touch targets */
+/* Action Buttons */
 .action-button {
   width: 100%;
-  padding: var(--spacing-md); /* Generous padding */
+  padding: var(--spacing-md);
   border: none;
   border-radius: var(--border-radius-md);
   font-size: var(--font-size-base);
@@ -568,225 +560,138 @@ body {
   transition: background-color 0.2s ease, transform 0.1s ease;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  margin-top: var(--spacing-sm); /* Add margin between buttons if stacked */
+  margin-top: var(--spacing-md); /* Spacing from content above */
+  flex-shrink: 0; /* Prevent button from shrinking */
 }
 
-.action-button:first-child {
-  margin-top: 0;
-}
-
-.btn-start {
-  background: var(--color-secondary);
-  color: var(--color-text-light);
-}
-
-.btn-start:active {
-  background: var(--color-secondary-active);
+.action-button:active {
   transform: scale(0.98);
 }
 
-.btn-ready {
-  background: var(--color-success);
-  color: var(--color-text-light);
-}
-
-.btn-ready:active {
-  background: var(--color-success-active);
-  transform: scale(0.98);
-}
-
-.btn-done {
+.btn-done { /* Used for "Complete" */
   background: var(--color-neutral);
   color: var(--color-text-light);
 }
+.btn-done:hover { background: var(--color-neutral-active); }
+.btn-done:active { background: var(--color-neutral-active); }
 
-.btn-done:active {
-  background: var(--color-neutral-active);
-  transform: scale(0.98);
+/* Error, Loading, Empty States */
+.global-error-message { /* Specific for errors outside individual lists */
+  background: var(--color-error-bg);
+  border: 1px solid var(--color-error-border);
+  color: var(--color-error);
+  padding: var(--spacing-md);
+  border-radius: var(--border-radius-md);
+  margin: 0 var(--spacing-md) var(--spacing-md); /* Positioned within main-content padding */
+  font-size: var(--font-size-sm);
+  text-align: center;
 }
 
-/* Empty state */
+
+.loading-state,
 .empty-state {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
   text-align: center;
-  padding: var(--spacing-xl) var(--spacing-lg);
+  padding: var(--spacing-xxl) var(--spacing-lg);
   color: var(--color-text-secondary);
+  width: 100%; /* Take full width of the scroll container */
+  height: 100%; /* Take full height if it's the only thing */
+  min-height: 200px; /* Ensure it's visible */
 }
 
 .empty-state h3 {
   font-size: var(--font-size-md);
   font-weight: 600;
   margin-bottom: var(--spacing-sm);
+  color: var(--color-text-primary);
 }
 
 .empty-state p {
   font-size: var(--font-size-sm);
 }
 
-/* Error message */
-.error-message {
-  background: var(--color-error-bg);
-  border: 1px solid var(--color-error-border);
-  color: var(--color-error);
-  padding: var(--spacing-md);
-  border-radius: var(--border-radius-md);
-  margin-bottom: var(--spacing-md);
-  font-size: var(--font-size-sm);
-  text-align: center;
+.loading-state {
+  font-size: var(--font-size-md);
+  font-weight: 600;
 }
 
-/* Loading state */
-.loading {
-  text-align: center;
-  padding: var(--spacing-xl);
-  color: var(--color-text-secondary);
-  font-size: var(--font-size-sm);
-}
 
-/* Responsive adjustments for very small screens (e.g., ~320px width and below) */
+/* Responsive Adjustments for very small screens (e.g., ~320px width) */
 @media (max-width: 360px) {
-  /* Target slightly wider than 320px for these common small screen adjustments */
   :root {
-    /* Adjust base font slightly if necessary, or other variables */
-    /* --font-size-base: 0.9375rem; 15px if 16px feels too large */
+    /* Consider reducing base font size slightly if 16px is too large */
+    /* --font-size-base: 0.9375rem;  ~15px */
   }
 
-  .header {
-    padding: var(--spacing-sm) var(--spacing-md);
-  }
-
-  .app-title {
-    font-size: var(--font-size-md); /* Slightly smaller title */
-  }
-
-  .stats {
-    gap: var(--spacing-md); /* Reduce gap in stats */
-  }
-
+  .header { padding: var(--spacing-sm) var(--spacing-md); }
+  .app-title { font-size: var(--font-size-md); }
+  .stats { gap: var(--spacing-md); }
   .tab-button {
-    padding: var(--spacing-md) var(--spacing-xxs); /* Further reduce padding for very small screens */
-    font-size: var(--font-size-xs); /* Smaller font for tabs */
-    min-height: var(--touch-target-min-height); /* Reduce min-height slightly if needed */
+    padding: var(--spacing-md) var(--spacing-sm); /* Adjust tab padding */
+    font-size: var(--font-size-xs);
+    min-height: var(--touch-target-min-height);
   }
-
-  .order-card,
-  .line-item-detailed {
+  .order-card {
+    min-width: 280px; /* Adjust min-width for smaller cards */
     padding: var(--spacing-md);
   }
+  .line-item-detailed { padding: var(--spacing-md); }
+  .main-content { padding: var(--spacing-sm); }
 
-  .main-content {
-    padding: var(--spacing-sm);
-  }
-
-  .item-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: var(--spacing-xs);
-  }
-
-  .item-main-info {
-    width: 100%; /* Ensure it takes full width in column layout */
-  }
-
-  .item-price {
-    align-self: flex-end; /* Price to the right */
-  }
-
-  .modifier-item {
-    /* If modifiers look cramped */
+  .item-header { /* Stack item name/qty and price on small screens if needed */
     /* flex-direction: column; */
     /* align-items: flex-start; */
-    /* gap: var(--spacing-xxs); */
+    /* gap: var(--spacing-xs); */
   }
+  .item-main-info { /* width: 100%; */ }
+  .item-price { /* align-self: flex-end; */ }
 
   .action-button {
-    font-size: var(--font-size-sm); /* Slightly smaller button text */
+    font-size: var(--font-size-sm);
     padding: var(--spacing-sm);
   }
 }
 
-/* Special layout for extremely narrow screens (e.g., 280px, certain smartwatches or edge cases) */
+/* Extremely narrow screens (e.g., 280px) */
 @media (max-width: 280px) {
-  .tabs {
-    flex-wrap: wrap; /* Allow tabs to wrap */
-  }
-
+  .tabs { flex-wrap: wrap; } /* Allow tabs to wrap */
   .tab-button {
     flex-basis: 50%; /* Two tabs per row */
-    flex-grow: 0;
-    font-size: var(--font-size-xs); /* Ensure text fits */
-    min-height: calc(var(--touch-target-min-height) * 0.9); /* Can be slightly smaller if wrapping */
+    font-size: var(--font-size-xs);
   }
-
   .tab-button:nth-child(odd):nth-last-child(1) {
-    /* If there's an odd one out (e.g., 5th tab) */
-    flex-basis: 100%; /* Make the last tab full width if it's alone on a row */
+    flex-basis: 100%; /* Full width for the last tab if it's alone */
   }
+  .order-card { min-width: 240px; }
 }
 
-
-/* Landscape orientation adjustments (typical for small phones in landscape) */
+/* Landscape on small devices (e.g., phone height < 500px) */
 @media (orientation: landscape) and (max-height: 500px) {
-  .header {
-    padding: var(--spacing-sm) var(--spacing-md);
-  }
-
-  .header-bottom {
-    display: none; /* Hide stats in landscape to save precious vertical space */
-  }
-
-  .app-title {
-    font-size: var(--font-size-md);
-  }
+  .header { padding: var(--spacing-sm) var(--spacing-md); }
+  .header-bottom { display: none; } /* Hide stats to save vertical space */
+  .app-title { font-size: var(--font-size-md); }
 
   .tab-button {
     padding: var(--spacing-sm) var(--spacing-xs);
-    min-height: calc(var(--touch-target-min-height) * 0.9); /* Can be slightly shorter */
+    min-height: calc(var(--touch-target-min-height) * 0.9);
     font-size: var(--font-size-xs);
   }
 
-  .order-card,
-  .line-item-detailed {
-    padding: var(--spacing-sm);
-    margin-bottom: var(--spacing-sm);
-  }
-
-  .main-content {
-    padding: var(--spacing-sm);
-  }
-
-  .item-variation,
-  .modifier-item,
-  .item-note {
-    padding: var(--spacing-xs) var(--spacing-sm);
-  }
+  .main-content { padding: var(--spacing-sm); }
+  .order-card { padding: var(--spacing-sm); }
+  .line-items { max-height: 150px; } /* Reduce max height for line items in landscape */
 
   .action-button {
     padding: var(--spacing-sm);
     min-height: calc(var(--touch-target-min-height) * 0.9);
     font-size: var(--font-size-sm);
   }
-
   .order-total {
+    font-size: var(--font-size-sm);
     margin-top: var(--spacing-sm);
     padding-top: var(--spacing-sm);
-    font-size: var(--font-size-sm); /* Slightly smaller total */
   }
-}
-
-.main-content {
-  flex: 1;
-  overflow-y: auto; /* This is key for enabling scrolling */
-  -webkit-overflow-scrolling: touch; /* Helps with momentum on touch devices, might have some effect on Pi */
-  padding: var(--spacing-md);
-  background-color: var(--color-background);
-  /* Add a class for drag scrolling if needed, e.g., .drag-scroll */
-}
-
-/* Optional: if you want to hide scrollbars (Chromium on Pi might show them) */
-.main-content::-webkit-scrollbar {
-  display: none; /* For Webkit browsers */
-}
-.main-content {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
 }

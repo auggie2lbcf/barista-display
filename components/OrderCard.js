@@ -1,126 +1,142 @@
+// components/OrderCard.js
 import React from "react";
+import { ORDER_STATUS } from "../lib/config";
+import { formatTime, formatCurrency } from "../lib/orderUtils"; // Import utility functions
+
+const OrderStatusBadge = ({ status }) => {
+  const statusMap = {
+    [ORDER_STATUS.IN_PROGRESS]: { label: "In Progress", class: "status-inprogress" },
+    [ORDER_STATUS.COMPLETED]: { label: "Completed", class: "status-completed" },
+    // Add other statuses if needed
+  };
+  const displayInfo = statusMap[status] || { label: status, class: "status-unknown" }; // Default for unknown
+
+  return (
+    <div className={`status-badge ${displayInfo.class}`}>
+      {displayInfo.label}
+    </div>
+  );
+};
+
+const LineItem = ({ item }) => (
+  <div className="line-item-detailed">
+    <div className="item-header">
+      <div className="item-main-info">
+        <span className="item-name" title={item.name}>{item.name}</span>
+        <span className="item-quantity">×{item.quantity}</span>
+      </div>
+      {item.price > 0 && (
+        <span className="item-price">{formatCurrency(item.price)}</span>
+      )}
+    </div>
+
+    {item.variationName && (
+      <div className="item-variation">
+        <span className="variation-label">Type:</span>
+        <span className="variation-name">{item.variationName}</span>
+      </div>
+    )}
+
+    {item.modifiers && item.modifiers.length > 0 && (
+      <div className="item-modifiers">
+        {item.modifiers.map((modifier, modIndex) => (
+          <div key={modIndex} className="modifier-item">
+            <span className="modifier-name">
+              {modifier.quantity > 1 ? `${modifier.quantity}× ` : ""}
+              {modifier.name}
+            </span>
+            {modifier.price > 0 && (
+              <span className="modifier-price">
+                +{formatCurrency(modifier.price)}
+              </span>
+            )}
+          </div>
+        ))}
+      </div>
+    )}
+
+    {item.note && (
+      <div className="item-note">
+        <span className="note-label">Item Note:</span>
+        <span className="note-text">{item.note}</span>
+      </div>
+    )}
+  </div>
+);
+
 
 const OrderCard = ({ order, onStatusUpdate, showCompleted = false }) => {
-  const formatTime = (timestamp) => {
-    return new Date(timestamp).toLocaleTimeString("en-US", {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
+  if (!order) return null;
 
-  const formatCurrency = (amount) => {
-    return `$${(amount / 100).toFixed(2)}`;
-  };
+  const {
+    id,
+    displayId,
+    timestamp,
+    completedAt,
+    customerName,
+    status,
+    lineItems = [],
+    notes: orderNotes,
+    total,
+  } = order;
 
-  const getStatusDisplay = (status) => {
-    const statusMap = {
-      inprogress: { label: "In Progress", class: "status-inprogress" },
-      completed: { label: "Completed", class: "status-completed" },
-    };
-    return statusMap[status] || { label: status, class: "status-inprogress" }; // Default to inprogress if unknown
-  };
-
-  const getActionButton = () => {
-    if (showCompleted || order.status === "completed") {
-      return null; // No action buttons for completed orders
+  const renderActionButton = () => {
+    if (showCompleted || status === ORDER_STATUS.COMPLETED) {
+      return null; // No action buttons for completed orders in either tab
     }
 
-    if (order.status === "inprogress") {
+    if (status === ORDER_STATUS.IN_PROGRESS) {
       return (
         <button
-          className="action-button btn-done" // Using btn-done style for complete
-          onClick={() => onStatusUpdate(order.id, "completed")}
+          type="button"
+          className="action-button btn-done"
+          onClick={() => onStatusUpdate(id, ORDER_STATUS.COMPLETED)}
+          aria-label={`Mark order ${displayId} as completed`}
         >
           Complete
         </button>
       );
     }
-    return null;
+    return null; // Default to no button if status is not 'inprogress'
   };
 
-  const statusDisplay = getStatusDisplay(order.status);
-
   return (
-    <div className={`order-card ${showCompleted ? 'completed-order' : ''}`}>
+    <div className={`order-card ${showCompleted ? 'completed-order' : 'inprogress-order'}`}>
       <div className="order-header">
         <div className="order-info">
-          <div className="order-id">Order #{order.displayId}</div>
+          <div className="order-id">Order #{displayId}</div>
           <div className="order-time">
-            Created: {formatTime(order.timestamp)}
+            Created: {formatTime(timestamp)}
           </div>
-          {order.completedAt && showCompleted && (
+          {customerName && (
+            <div className="order-customer" title={customerName}>{customerName}</div>
+          )}
+          {showCompleted && completedAt && (
             <div className="completion-time">
-              Completed: {formatTime(order.completedAt)}
+              Completed: {formatTime(completedAt)}
             </div>
           )}
-          {order.customerName && (
-            <div className="order-customer">{order.customerName}</div>
-          )}
         </div>
-        <div className={`status-badge ${statusDisplay.class}`}>
-          {statusDisplay.label}
-        </div>
+        <OrderStatusBadge status={status} />
       </div>
 
-      {order.lineItems && order.lineItems.length > 0 && (
+      {lineItems.length > 0 && (
         <div className="line-items">
-          {order.lineItems.map((item, index) => (
-            <div key={index} className="line-item-detailed">
-              <div className="item-header">
-                <div className="item-main-info">
-                  <span className="item-name">{item.name}</span>
-                  <span className="item-quantity">×{item.quantity}</span>
-                </div>
-                {item.price > 0 && (
-                  <span className="item-price">{formatCurrency(item.price)}</span>
-                )}
-              </div>
-              
-              {item.variationName && (
-                <div className="item-variation">
-                  <span className="variation-label">Size/Type:</span>
-                  <span className="variation-name">{item.variationName}</span>
-                </div>
-              )}
-
-              {item.modifiers && item.modifiers.length > 0 && (
-                <div className="item-modifiers">
-                  {item.modifiers.map((modifier, modIndex) => (
-                    <div key={modIndex} className="modifier-item">
-                      <span className="modifier-name">
-                        {modifier.quantity > 1 ? `${modifier.quantity}× ` : ""}
-                        {modifier.name}
-                      </span>
-                      {modifier.price > 0 && (
-                        <span className="modifier-price">
-                          +{formatCurrency(modifier.price)}
-                        </span>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {item.note && (
-                <div className="item-note">
-                  <span className="note-label">Note:</span>
-                  <span className="note-text">{item.note}</span>
-                </div>
-              )}
-            </div>
+          {lineItems.map((item, index) => (
+            <LineItem key={`${id}-item-${index}`} item={item} />
           ))}
         </div>
       )}
 
-      {order.notes && (
+      {orderNotes && (
         <div className="order-notes">
-          <strong>Order Note:</strong> {order.notes}
+          <strong>Order Note:</strong> {orderNotes}
         </div>
       )}
 
-      <div className="order-total">Total: {formatCurrency(order.total)}</div>
+      <div className="order-total">Total: {formatCurrency(total)}</div>
 
-      {getActionButton()}
+      {renderActionButton()}
     </div>
   );
 };
