@@ -1,0 +1,678 @@
+/* Reset and base styles for 5-inch touchscreen */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px; /* Base font size for rem calculations */
+  height: 100%;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto",
+    "Oxygen", "Ubuntu", "Cantarell", sans-serif;
+  line-height: 1.4;
+  color: #333;
+  background-color: #f8f9fa;
+  height: 100%;
+  /* Optimize for touch */
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  /* Smooth scrolling */
+  -webkit-overflow-scrolling: touch;
+  overflow-x: hidden;
+}
+
+#__next {
+  height: 100%;
+}
+
+/* Container for 5-inch screen */
+.container {
+  max-width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Header optimized for small screen */
+.header {
+  background: linear-gradient(135deg, #6b4423 0%, #8b5a3c 100%);
+  color: white;
+  padding: 0.75rem;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.app-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.connection-status {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.75rem;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #4ade80;
+}
+
+.status-dot.error {
+  background-color: #ef4444;
+}
+
+.header-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.stats {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.75rem;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.stat-count {
+  font-weight: 700;
+  font-size: 0.875rem;
+}
+
+/* Touch-friendly refresh button */
+.refresh-btn {
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  min-height: 44px;
+  min-width: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.refresh-btn:active {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(0.95);
+}
+
+.refresh-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Tab navigation for small screen */
+.tabs {
+  display: flex;
+  background: white;
+  border-bottom: 1px solid #e5e7eb;
+  flex-shrink: 0;
+}
+
+.tab-button {
+  flex: 1;
+  padding: 0.875rem 0.5rem;
+  border: none;
+  background: white;
+  color: #6b7280;
+  font-size: 0.875rem;
+  font-weight: 600;
+  min-height: 50px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-bottom: 3px solid transparent;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.tab-button.active {
+  color: #6b4423;
+  border-bottom-color: #6b4423;
+  background: #fef7ed;
+}
+
+.tab-button:active {
+  background: #f3f4f6;
+  transform: scale(0.98);
+}
+
+/* Main content area */
+.main-content {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 0.75rem;
+}
+
+/* Orders list */
+.orders-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+/* Order card optimized for touch */
+.order-card {
+  background: white;
+  border-radius: 12px;
+  padding: 1rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e5e7eb;
+  transition: all 0.2s ease;
+}
+
+.order-card:active {
+  transform: scale(0.98);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+.order-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.75rem;
+}
+
+.order-info {
+  flex: 1;
+}
+
+.order-id {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #374151;
+  margin-bottom: 0.25rem;
+}
+
+.order-time {
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+.order-customer {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 0.25rem;
+}
+
+/* Status badges */
+.status-badge {
+  padding: 0.375rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-new {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.status-preparing {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.status-ready {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+/* Line items */
+.line-items {
+  margin: 0.75rem 0;
+}
+
+.line-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.375rem 0;
+  border-bottom: 1px solid #f3f4f6;
+  font-size: 0.875rem;
+}
+
+.line-item:last-child {
+  border-bottom: none;
+}
+
+.item-name {
+  font-weight: 600;
+  color: #374151;
+}
+
+.item-quantity {
+  background: #f3f4f6;
+  color: #374151;
+  padding: 0.125rem 0.5rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  min-width: 24px;
+  text-align: center;
+}
+
+/* Order total */
+.order-total {
+  text-align: right;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #111827;
+  margin: 0.75rem 0;
+  padding-top: 0.75rem;
+  border-top: 2px solid #f3f4f6;
+}
+
+/* Action buttons - large touch targets */
+.action-button {
+  width: 100%;
+  padding: 0.875rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 700;
+  min-height: 50px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.btn-start {
+  background: #3b82f6;
+  color: white;
+}
+
+.btn-start:active {
+  background: #2563eb;
+  transform: scale(0.98);
+}
+
+.btn-ready {
+  background: #10b981;
+  color: white;
+}
+
+.btn-ready:active {
+  background: #059669;
+  transform: scale(0.98);
+}
+
+.btn-done {
+  background: #6b7280;
+  color: white;
+}
+
+.btn-done:active {
+  background: #4b5563;
+  transform: scale(0.98);
+}
+
+/* Empty state */
+.empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: #6b7280;
+}
+
+.empty-state h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.empty-state p {
+  font-size: 0.875rem;
+}
+
+/* Error message */
+.error-message {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #dc2626;
+  padding: 0.75rem;
+  border-radius: 8px;
+  margin-bottom: 0.75rem;
+  font-size: 0.875rem;
+  text-align: center;
+}
+
+/* Loading state */
+.loading {
+  text-align: center;
+  padding: 2rem;
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
+/* Responsive adjustments for very small screens */
+@media (max-width: 320px) {
+  .header {
+    padding: 0.5rem;
+  }
+
+  .app-title {
+    font-size: 1.125rem;
+  }
+
+  .stats {
+    gap: 0.75rem;
+  }
+
+  .order-card {
+    padding: 0.75rem;
+  }
+
+  .main-content {
+    padding: 0.5rem;
+  }
+}
+
+/* Landscape orientation adjustments */
+@media (orientation: landscape) and (max-height: 500px) {
+  .header {
+    padding: 0.5rem 0.75rem;
+  }
+
+  .header-bottom {
+    display: none; /* Hide stats in landscape to save space */
+  }
+
+  .tab-button {
+    padding: 0.625rem 0.5rem;
+    min-height: 40px;
+  }
+
+  .order-card {
+    padding: 0.75rem;
+  }
+}
+
+/* Add these new styles to your existing globals.css file */
+
+/* Enhanced line item styling for variations and modifiers */
+.line-item-detailed {
+  border: 1px solid #f3f4f6;
+  border-radius: 8px;
+  padding: 0.75rem;
+  margin-bottom: 0.75rem;
+  background: #fafafa;
+}
+
+.line-item-detailed:last-child {
+  margin-bottom: 0;
+}
+
+.item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.item-main-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+}
+
+.item-name {
+  font-weight: 700;
+  color: #111827;
+  font-size: 0.875rem;
+}
+
+.item-quantity {
+  background: #3b82f6;
+  color: white;
+  padding: 0.125rem 0.5rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  min-width: 24px;
+  text-align: center;
+}
+
+.item-price {
+  font-weight: 600;
+  color: #374151;
+  font-size: 0.875rem;
+}
+
+/* Variation styling */
+.item-variation {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  padding: 0.375rem 0.5rem;
+  background: #e0f2fe;
+  border-radius: 6px;
+  border-left: 3px solid #0ea5e9;
+}
+
+.variation-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #0369a1;
+}
+
+.variation-name {
+  font-size: 0.75rem;
+  color: #0369a1;
+  font-weight: 500;
+}
+
+/* Modifiers styling */
+.item-modifiers {
+  margin-bottom: 0.5rem;
+}
+
+.modifier-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.25rem 0.5rem;
+  margin-bottom: 0.25rem;
+  background: #fef3c7;
+  border-radius: 4px;
+  border-left: 3px solid #f59e0b;
+}
+
+.modifier-item:last-child {
+  margin-bottom: 0;
+}
+
+.modifier-name {
+  font-size: 0.75rem;
+  color: #92400e;
+  font-weight: 500;
+}
+
+.modifier-price {
+  font-size: 0.75rem;
+  color: #92400e;
+  font-weight: 600;
+}
+
+/* Item notes styling */
+.item-note {
+  display: flex;
+  gap: 0.375rem;
+  padding: 0.375rem 0.5rem;
+  background: #f3e8ff;
+  border-radius: 4px;
+  border-left: 3px solid #8b5cf6;
+  margin-top: 0.5rem;
+}
+
+.note-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #6b21a8;
+}
+
+.note-text {
+  font-size: 0.75rem;
+  color: #6b21a8;
+  flex: 1;
+}
+
+/* Order-level notes */
+.order-notes {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #dc2626;
+  padding: 0.75rem;
+  border-radius: 6px;
+  margin: 0.75rem 0;
+  font-size: 0.75rem;
+}
+
+/* Responsive adjustments for small screens */
+@media (max-width: 320px) {
+  .line-item-detailed {
+    padding: 0.5rem;
+  }
+  
+  .item-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+  
+  .item-main-info {
+    width: 100%;
+  }
+  
+  .item-price {
+    align-self: flex-end;
+  }
+  
+  .modifier-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.125rem;
+  }
+}
+
+/* Landscape orientation adjustments */
+@media (orientation: landscape) and (max-height: 500px) {
+  .line-item-detailed {
+    padding: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .item-variation,
+  .modifier-item,
+  .item-note {
+    padding: 0.25rem 0.5rem;
+  }
+}
+
+/* Add these new styles to your existing globals.css file */
+
+/* Tab styling updates for 5 tabs */
+.tab-button {
+  flex: 1;
+  padding: 0.75rem 0.375rem; /* Reduced padding for 5 tabs */
+  border: none;
+  background: white;
+  color: #6b7280;
+  font-size: 0.8rem; /* Slightly smaller font for 5 tabs */
+  font-weight: 600;
+  min-height: 50px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-bottom: 3px solid transparent;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Completed status badge */
+.status-completed {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+/* Completed order card styling */
+.completed-order {
+  opacity: 0.8;
+  background: #f9fafb;
+  border-color: #d1d5db;
+}
+
+.completed-order .order-header {
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+/* Completion time styling */
+.completion-time {
+  font-size: 0.75rem;
+  color: #059669;
+  font-weight: 500;
+}
+
+/* Responsive adjustments for 5 tabs on small screens */
+@media (max-width: 320px) {
+  .tab-button {
+    padding: 0.625rem 0.25rem;
+    font-size: 0.75rem;
+  }
+}
+
+/* Very small screen tab layout */
+@media (max-width: 280px) {
+  .tabs {
+    flex-wrap: wrap;
+  }
+  
+  .tab-button {
+    flex: 0 0 50%;
+    min-height: 40px;
+  }
+  
+  .tab-button:nth-child(5) {
+    flex: 1 0 100%;
+  }
+}
+
+
