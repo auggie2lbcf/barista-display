@@ -14,50 +14,28 @@ const OrderCard = ({ order, onStatusUpdate, showCompleted = false }) => {
 
   const getStatusDisplay = (status) => {
     const statusMap = {
-      received: { label: "New", class: "status-new" },
-      preparing: { label: "Preparing", class: "status-preparing" },
-      ready: { label: "Ready", class: "status-ready" },
+      inprogress: { label: "In Progress", class: "status-inprogress" },
       completed: { label: "Completed", class: "status-completed" },
     };
-    return statusMap[status] || { label: status, class: "status-new" };
+    return statusMap[status] || { label: status, class: "status-inprogress" }; // Default to inprogress if unknown
   };
 
   const getActionButton = () => {
-    if (showCompleted) {
+    if (showCompleted || order.status === "completed") {
       return null; // No action buttons for completed orders
     }
 
-    switch (order.status) {
-      case "received":
-        return (
-          <button
-            className="action-button btn-start"
-            onClick={() => onStatusUpdate(order.id, "preparing")}
-          >
-            Start
-          </button>
-        );
-      case "preparing":
-        return (
-          <button
-            className="action-button btn-ready"
-            onClick={() => onStatusUpdate(order.id, "ready")}
-          >
-            Ready
-          </button>
-        );
-      case "ready":
-        return (
-          <button
-            className="action-button btn-done"
-            onClick={() => onStatusUpdate(order.id, "completed")}
-          >
-            Done
-          </button>
-        );
-      default:
-        return null;
+    if (order.status === "inprogress") {
+      return (
+        <button
+          className="action-button btn-done" // Using btn-done style for complete
+          onClick={() => onStatusUpdate(order.id, "completed")}
+        >
+          Complete
+        </button>
+      );
     }
+    return null;
   };
 
   const statusDisplay = getStatusDisplay(order.status);

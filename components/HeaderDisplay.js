@@ -17,17 +17,14 @@ const HeaderDisplay = ({ connectionStatus, stats, onRefresh, isLoading }) => {
       <div className="header-bottom">
         <div className="stats">
           <div className="stat-item">
-            <span>New:</span>
-            <span className="stat-count">{stats.new}</span>
+            <span>In Progress:</span>
+            <span className="stat-count">{stats.inprogress}</span>
           </div>
-          <div className="stat-item">
-            <span>Prep:</span>
-            <span className="stat-count">{stats.preparing}</span>
-          </div>
-          <div className="stat-item">
-            <span>Ready:</span>
-            <span className="stat-count">{stats.ready}</span>
-          </div>
+          {/* You can add Completed count here if desired, or keep it minimal */}
+          {/* <div className="stat-item">
+            <span>Completed:</span>
+            <span className="stat-count">{stats.completed}</span>
+          </div> */}
         </div>
         <button
           className="refresh-btn"

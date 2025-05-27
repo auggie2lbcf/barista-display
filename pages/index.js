@@ -8,30 +8,24 @@ import { CONFIG } from "../lib/config";
 export default function Home() {
   const [orders, setOrders] = useState([]);
   const [filteredOrders, setFilteredOrders] = useState([]);
-  const [activeTab, setActiveTab] = useState("all");
+  const [activeTab, setActiveTab] = useState("inprogress"); // Default to inprogress
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [connectionStatus, setConnectionStatus] = useState("connected");
 
-  // Calculate statistics including completed orders
   const stats = React.useMemo(() => {
-    const total = orders.filter(order => order.status !== "completed").length;
-    const new_ = orders.filter((order) => order.status === "received").length;
-    const preparing = orders.filter(
-      (order) => order.status === "preparing"
-    ).length;
-    const ready = orders.filter((order) => order.status === "ready").length;
+    const inprogress = orders.filter(order => order.status === "inprogress").length;
     const completed = orders.filter((order) => order.status === "completed").length;
-
-    return { total, new: new_, preparing, ready, completed };
+    // total will represent active (inprogress) orders for the "All" tab if we rename "inprogress" tab to "All Active"
+    // or simply be the inprogress count if we have "In Progress" and "Completed" tabs.
+    // For this simplification, "total" can be considered the count of "inprogress" orders.
+    return { total: inprogress, inprogress, completed };
   }, [orders]);
 
-  // Transform Square order data with proper state mapping
   const transformSquareOrder = (order) => {
     console.log("=== Processing Order ===");
     console.log("Order ID:", order.id);
     console.log("Order State:", order.state);
-    // console.log("Full Order:", JSON.stringify(order, null, 2)); // Verbose
 
     if (!order || !order.id) {
       console.warn("Invalid order object:", order);
@@ -41,47 +35,31 @@ export default function Home() {
     const fulfillments = order.fulfillments || [];
     const lineItems = order.line_items || [];
 
-    let status = "received"; // default
+    let status = "inprogress"; // Default to inprogress
     let completedAt = null;
-
-    // console.log("Fulfillments:", fulfillments); // Verbose
 
     if (order.state === "COMPLETED") {
       status = "completed";
       completedAt = order.updated_at || order.created_at;
     } else if (order.state === "CANCELED") {
-      return null;
+      return null; // Skip canceled orders
     } else {
+      // Any other "OPEN" state or relevant fulfillment state will be "inprogress"
+      // If specific Square fulfillment states should prevent "inprogress", add logic here.
+      // For now, if not COMPLETED or CANCELED, it's inprogress.
       if (fulfillments && fulfillments.length > 0) {
         const primaryFulfillment = fulfillments[0];
-        
-        // console.log("Primary Fulfillment State:", primaryFulfillment.state); // Verbose
-        // console.log("Primary Fulfillment:", JSON.stringify(primaryFulfillment, null, 2)); // Verbose
-
-        switch (primaryFulfillment.state) {
-          case "PROPOSED":
-            status = "received";
-            break;
-          case "RESERVED": // Square's "IN_PROGRESS" or "ACCEPTED" might map to "RESERVED" or custom logic
-            status = "preparing";
-            break;
-          case "PREPARED":
-            status = "ready";
-            break;
-          case "COMPLETED":
-            status = "completed";
-            completedAt = primaryFulfillment.updated_at || primaryFulfillment.created_at;
-            break;
-          case "CANCELED":
+        if (primaryFulfillment.state === "COMPLETED") {
+           status = "completed";
+           completedAt = primaryFulfillment.updated_at || primaryFulfillment.created_at || order.updated_at;
+        } else if (primaryFulfillment.state === "CANCELED") {
             return null;
-          default:
-            console.warn("Unknown fulfillment state:", primaryFulfillment.state);
-            status = "received";
         }
+        // Other fulfillment states like PROPOSED, RESERVED, PREPARED all map to "inprogress"
       }
     }
-
-    // console.log("Determined Status:", status); // Verbose
+    
+    console.log("Determined Status:", status);
 
     let customerName = null;
     if (fulfillments[0]?.pickup_details?.recipient?.display_name) {
@@ -90,40 +68,32 @@ export default function Home() {
       customerName = fulfillments[0].pickup_details.note;
     } else if (fulfillments[0]?.delivery_details?.recipient?.display_name) {
       customerName = fulfillments[0].delivery_details.recipient.display_name;
-    } else if (order.recipient?.display_name) { // Fallback to order level recipient
+    } else if (order.recipient?.display_name) {
       customerName = order.recipient.display_name;
     }
 
-
-    const processedLineItems = lineItems.map((item) => {
-      let itemName = item.name || "Unknown Item";
-      let variationName = item.variation_name || item.catalog_object_id || null;
-
-      const modifiers = (item.modifiers || []).map((modifier) => ({
+    const processedLineItems = lineItems.map((item) => ({
+      name: item.name || "Unknown Item",
+      variationName: item.variation_name || item.catalog_object_id || null,
+      quantity: parseInt(item.quantity) || 1,
+      modifiers: (item.modifiers || []).map((modifier) => ({
         name: modifier.name || "Modifier",
         quantity: parseInt(modifier.quantity) || 1,
         price: modifier.base_price_money ? parseInt(modifier.base_price_money.amount) : 0,
         catalog_object_id: modifier.catalog_object_id || null,
-      }));
+      })),
+      note: item.note || null,
+      price: item.total_money ? parseInt(item.total_money.amount) : 0,
+      catalog_object_id: item.catalog_object_id || null,
+    }));
 
-      return {
-        name: itemName,
-        variationName: variationName,
-        quantity: parseInt(item.quantity) || 1,
-        modifiers: modifiers,
-        note: item.note || null,
-        price: item.total_money ? parseInt(item.total_money.amount) : 0,
-        catalog_object_id: item.catalog_object_id || null,
-      };
-    });
-
-    const transformedOrder = {
+    return {
       id: order.id,
       displayId: order.id.slice(-6),
-      version: order.version, // Ensure version is captured
+      version: order.version,
       status,
       timestamp: order.created_at || new Date().toISOString(),
-      completedAt: completedAt,
+      completedAt,
       customerName,
       lineItems: processedLineItems,
       total: parseInt(order.total_money?.amount || 0),
@@ -132,10 +102,6 @@ export default function Home() {
       squareOrderState: order.state,
       squareFulfillmentState: fulfillments[0]?.state || null,
     };
-
-    // console.log("Transformed Order:", transformedOrder); // Verbose
-    // console.log("=== End Processing Order ===\n"); // Verbose
-    return transformedOrder;
   };
 
   const fetchOrders = useCallback(async () => {
@@ -157,7 +123,7 @@ export default function Home() {
         body: JSON.stringify({
           environment: CONFIG.SQUARE_ENVIRONMENT_CONFIG,
           square_api_path: "/v2/orders/search",
-          actual_method_for_square: "POST", // Explicitly state method for proxy
+          actual_method_for_square: "POST",
           body: {
             location_ids: [CONFIG.SQUARE_LOCATION_ID_CONFIG],
             query: {
@@ -178,11 +144,6 @@ export default function Home() {
       }
 
       const data = await response.json();
-      // console.log("=== Square API Response (Fetch) ==="); // Verbose
-      // console.log("Total orders returned:", data.orders?.length || 0); // Verbose
-      // console.log("Full response:", JSON.stringify(data, null, 2)); // Verbose
-
-
       if (data.errors && data.errors.length > 0) {
         throw new Error(data.errors[0].detail || "Square API error during fetch");
       }
@@ -206,32 +167,20 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    let filtered = orders;
-    switch (activeTab) {
-      case "new":
-        filtered = orders.filter((order) => order.status === "received");
-        break;
-      case "preparing":
-        filtered = orders.filter((order) => order.status === "preparing");
-        break;
-      case "ready":
-        filtered = orders.filter((order) => order.status === "ready");
-        break;
-      case "completed":
-        filtered = orders.filter((order) => order.status === "completed");
-        break;
-      case "all":
-      default:
-        filtered = orders.filter((order) => order.status !== "completed");
+    let filtered = [];
+    if (activeTab === "inprogress") {
+      filtered = orders.filter((order) => order.status === "inprogress");
+    } else if (activeTab === "completed") {
+      filtered = orders.filter((order) => order.status === "completed");
     }
 
     if (activeTab === "completed") {
       filtered = filtered.sort((a, b) => 
         new Date(b.completedAt || b.timestamp) - new Date(a.completedAt || a.timestamp)
       );
-    } else {
+    } else { // "inprogress"
       filtered = filtered.sort((a, b) => 
-        new Date(a.timestamp) - new Date(b.timestamp) // Sort oldest first for active orders
+        new Date(a.timestamp) - new Date(b.timestamp)
       );
     }
     setFilteredOrders(filtered);
@@ -244,7 +193,12 @@ export default function Home() {
   }, [fetchOrders]);
 
   const handleStatusUpdate = async (orderId, newStatus) => {
-    console.log(`Attempting to update order ${orderId} to status: ${newStatus}`);
+    // We only allow updating to "completed"
+    if (newStatus !== "completed") {
+        setError("Invalid status update. Only 'completed' is allowed.");
+        return;
+    }
+    console.log(`Attempting to mark order ${orderId} as ${newStatus}`);
     
     const orderToUpdate = orders.find(o => o.id === orderId);
     if (!orderToUpdate) {
@@ -254,43 +208,23 @@ export default function Home() {
 
     if (typeof orderToUpdate.version === 'undefined') {
       setError("Error: Order version is missing. Please refresh.");
-      fetchOrders();
-      return;
-    }
-
-    // Block fulfillment state updates if no fulfillmentId and not marking as completed
-    if (!orderToUpdate.fulfillmentId && newStatus !== "completed") {
-      setError("This order cannot be updated because it has no fulfillment. Only completed status is allowed.");
+      fetchOrders(); // Force refresh
       return;
     }
 
     const originalOrders = [...orders];
 
-    // Optimistically update UI
     setOrders((prevOrders) =>
       prevOrders.map((order) => {
         if (order.id === orderId) {
-          const updatedOrder = { ...order, status: newStatus };
-          if (newStatus === "completed" && !order.completedAt) {
-            updatedOrder.completedAt = new Date().toISOString();
-          }
-          return updatedOrder;
+          return { ...order, status: newStatus, completedAt: new Date().toISOString() };
         }
         return order;
       })
     );
 
-    let squareFulfillmentState;
-    switch (newStatus) {
-      case "received": squareFulfillmentState = "PROPOSED"; break;
-      case "preparing": squareFulfillmentState = "RESERVED"; break;
-      case "ready": squareFulfillmentState = "PREPARED"; break;
-      case "completed": squareFulfillmentState = "COMPLETED"; break;
-      default: setError("Unknown status for Square mapping."); return;
-    }
-
-    const idempotencyKey = `update-${orderId}-${newStatus}-${Date.now()}`;
-
+    const idempotencyKey = `complete-${orderId}-${Date.now()}`;
+    
     try {
       const requestBodyToProxy = {
         environment: CONFIG.SQUARE_ENVIRONMENT_CONFIG,
@@ -305,20 +239,18 @@ export default function Home() {
         },
       };
 
-      // Only include fulfillments if fulfillmentId exists
       if (orderToUpdate.fulfillmentId) {
         requestBodyToProxy.body.order.fulfillments = [
           {
             uid: orderToUpdate.fulfillmentId,
-            state: squareFulfillmentState,
+            state: "COMPLETED", // Directly set to Square's COMPLETED state
           },
         ];
-      }
-
-      // If marking as completed and there's no fulfillmentId, update order state
-      if (newStatus === "completed" && !orderToUpdate.fulfillmentId) {
+      } else {
+        // If no fulfillmentId, update the order state directly to COMPLETED
         requestBodyToProxy.body.order.state = "COMPLETED";
       }
+
 
       const response = await fetch("/api/square-proxy", {
         method: "POST",
@@ -329,39 +261,27 @@ export default function Home() {
       if (!response.ok) {
         const errorResult = await response.json().catch(() => ({ detail: response.statusText }));
         console.error("Square update API error response:", errorResult);
-
-        if (
-          Array.isArray(errorResult.errors) &&
-          errorResult.errors.some(e => e.code === "VERSION_MISMATCH")
-        ) {
+        // Handle version mismatch or other errors
+        if (errorResult.errors?.some(e => e.code === "VERSION_MISMATCH")) {
           setError("Order was updated elsewhere. Refreshing orders. Please try again.");
           fetchOrders();
-          setOrders(originalOrders);
-          return;
-        }
-
-        if (Array.isArray(errorResult.errors) && errorResult.errors.length > 0) {
-          setError(`Square API error: ${errorResult.errors[0].detail || "Unknown error"}`);
-        } else if (errorResult.detail) {
-          setError(`Square API error: ${errorResult.detail}`);
         } else {
-          setError("Failed to update order due to an unknown error.");
+          setError(`Square API error: ${errorResult.errors?.[0]?.detail || errorResult.detail || "Unknown error"}`);
         }
-        setOrders(originalOrders);
+        setOrders(originalOrders); // Revert optimistic update
         return;
       }
 
       const result = await response.json();
       console.log("Square order update successful:", result);
-      fetchOrders();
+      fetchOrders(); // Refresh orders to get the latest state and version
 
     } catch (error) {
       console.error("Error updating Square order:", error);
-      setOrders(originalOrders);
+      setOrders(originalOrders); // Revert optimistic update
       setError(`Failed to update order: ${error.message}. Please try refreshing.`);
     }
   };
-
 
   return (
     <>
@@ -389,8 +309,8 @@ export default function Home() {
           <OrdersList
             orders={filteredOrders}
             onStatusUpdate={handleStatusUpdate}
-            isLoading={isLoading && orders.length === 0} // Show loading only if no orders yet
-            error={!error && orders.length === 0 && !isLoading ? "No orders to display." : null} // Adjusted error prop for OrdersList
+            isLoading={isLoading && orders.length === 0}
+            error={!error && orders.length === 0 && !isLoading ? "No orders to display." : null}
             showCompleted={activeTab === "completed"}
           />
         </main>

@@ -2,11 +2,8 @@ import React from "react";
 
 const OrderTabs = ({ activeTab, onTabChange, stats }) => {
   const tabs = [
-    { id: "all", label: "All", count: stats.total },
-    { id: "new", label: "New", count: stats.new },
-    { id: "preparing", label: "Prep", count: stats.preparing },
-    { id: "ready", label: "Ready", count: stats.ready },
-    { id: "completed", label: "Done", count: stats.completed },
+    { id: "inprogress", label: "In Progress", count: stats.inprogress },
+    { id: "completed", label: "Completed", count: stats.completed },
   ];
 
   return (
